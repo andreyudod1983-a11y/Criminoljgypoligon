@@ -1,0 +1,3021 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кримінологічний полігон v3.3</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .version-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .police-light { animation: policeBlink 1s infinite alternate; }
+        @keyframes policeBlink {
+            0%, 100% { color: #ff0000; text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+            50% { color: #0088ff; text-shadow: 0 0 10px #0088ff, 0 0 20px #0088ff; }
+        }
+        .top-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .teacher-panel {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .teacher-panel h3 { margin-bottom: 10px; font-size: 1.1em; }
+        .btn-small {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn-small:hover { background: #138496; transform: translateY(-2px); }
+        .student-input { width: 100%; padding: 8px; border-radius: 5px; border: none; margin-top: 5px; }
+        .game-area {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .resources-panel {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .resource-item { text-align: center; flex: 1; }
+        .resource-item h3 { font-size: 1.5em; margin-bottom: 5px; }
+        .resources-low {
+            background: linear-gradient(135deg, #dc3545, #c82333) !important;
+            animation: dangerPulse 1.5s infinite;
+        }
+        @keyframes dangerPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 8px 25px rgba(220, 53, 69, 0.6); }
+        }
+        .stage-indicator {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .stage-indicator h2 { color: #1e3c72; margin-bottom: 10px; }
+        .scenario { display: none; animation: fadeIn 0.5s ease-in; }
+        .scenario.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .problem-description {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #dc3545;
+        }
+        .criminology-theory {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #0056b3;
+            color: #333;
+        }
+        .criminology-theory h4 { color: #0056b3; margin-bottom: 8px; }
+        .game-win .criminology-theory { color: #1a1a1a; }
+        .statistics { background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #ffc107; }
+        .options { display: grid; gap: 15px; margin-bottom: 25px; }
+        .option {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .option:hover {
+            border-color: #2a5298;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.2);
+        }
+        .option.selected { border-color: #28a745; background: #d4edda; }
+        .option h3 { color: #1e3c72; margin-bottom: 10px; font-size: 1.2em; }
+        .cost-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #17a2b8;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .cost-high { background: #dc3545 !important; }
+        .cost-medium { background: #ffc107 !important; color: #333 !important; }
+        .cost-low { background: #28a745 !important; }
+        .btn {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background: #1e3c72; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .btn:disabled { background: #6c757d; cursor: not-allowed; transform: none; }
+        .results { display: none; padding: 20px; margin-top: 20px; border-radius: 10px; color: #333; }
+        .results.show { display: block; animation: slideIn 0.5s ease-out; }
+        .results.success { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .results.failure { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .results.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        .scenario-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+        .scenario-card:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-5px);
+            border-color: #2a5298;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .scenario-card h3 { margin-bottom: 10px; color: #1e3c72; font-weight: bold; }
+        .scenario-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .badge-new { background: #28a745; color: white; }
+        .badge-war { background: #dc3545; color: white; }
+        .badge-cyber { background: #17a2b8; color: white; }
+        .badge-classic { background: #6c757d; color: white; }
+        .game-over, .game-win { text-align: center; padding: 40px; border-radius: 15px; margin: 20px 0; }
+        .game-over { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+        .game-win { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .game-win #final-stats { color: #f0f0f0; }
+        .game-win p { color: white; }
+        .knowledge-base {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px solid #0056b3;
+        }
+        .knowledge-base h3 { color: #0056b3; margin-bottom: 15px; }
+        .theory-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #0056b3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theory-item:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.1); transform: translateX(5px); }
+        .theory-content {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+            line-height: 1.6;
+        }
+        .theory-content.show { display: block; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #333;
+        }
+        .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #666; }
+        .close:hover { color: #000; }
+        @media (max-width: 768px) {
+            .top-panel { grid-template-columns: 1fr; }
+            .scenario-list { grid-template-columns: 1fr; }
+            .resources-panel { flex-direction: column; gap: 15px; }
+        }
+
+        /* Стилі для візуалізації */
+        .visualization-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .chart-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .line-chart {
+            position: relative;
+            height: 200px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 150px;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 5px;
+        }
+        .bar {
+            flex: 1;
+            margin: 0 5px;
+            background: linear-gradient(to top, #2a5298, #4a7bc8);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 20px;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+        .bar-value {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        .mood-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+            border-radius: 8px;
+            position: relative;
+            height: 60px;
+        }
+        .mood-indicator {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            border: 3px solid #1e3c72;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        .status-excellent { background: #28a745; color: white; }
+        .status-good { background: #17a2b8; color: white; }
+        .status-medium { background: #ffc107; color: #333; }
+        .status-bad { background: #dc3545; color: white; }
+        
+        /* Стилі для випадкових подій */
+        .random-event-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+        .random-event-modal {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.4s ease;
+            color: white;
+        }
+        .random-event-header {
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+        .random-event-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .random-event-description {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            backdrop-filter: blur(10px);
+        }
+        .random-event-options {
+            display: grid;
+            gap: 15px;
+        }
+        .random-event-option {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .random-event-option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .random-event-option-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .random-event-impact {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        /* Стилі для таймера */
+        .timer-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            display: none;
+            animation: slideInRight 0.5s ease;
+        }
+        .timer-container.active {
+            display: block;
+        }
+        .timer-container.warning {
+            animation: shake 0.5s ease infinite;
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+        }
+        .timer-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            min-width: 80px;
+        }
+        .timer-label {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .timer-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .timer-progress-bar {
+            height: 100%;
+            background: white;
+            transition: width 0.1s linear;
+            border-radius: 3px;
+        }
+        .time-mode-toggle {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+        .time-mode-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .time-mode-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @media (max-width: 768px) {
+            .chart-grid { grid-template-columns: 1fr; }
+            .random-event-modal { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="police-light">🚨</span> Кримінологічний полігон</h1>
+            <p>Навчальна симуляція превентивної роботи поліції</p>
+            <span class="version-badge">Версія 3.3</span>
+        </div>
+
+        <div class="top-panel">
+            <div class="teacher-panel">
+                <h3>👤 Тестуючий</h3>
+                <input type="text" id="student-name" class="student-input" placeholder="Введіть ПІБ">
+                <input type="text" id="student-group" class="student-input" placeholder="Група">
+                
+                <div class="time-mode-toggle">
+                    <label>
+                        <input type="checkbox" id="time-pressure-mode">
+                        ⏱️ Режим "Під тиском часу" (45 сек на рішення)
+                    </label>
+                    <p style="font-size: 0.9em; color: #666; margin: 10px 0 0 30px;">
+                        Симулює стрес реальних ситуацій. Якщо час вийде - автоматично обереться найгірший варіант.
+                    </p>
+                </div>
+            </div>
+            <div class="teacher-panel">
+                <h3>📊 Панель викладача</h3>
+                <button class="btn-small" onclick="viewProgress()">📈 Прогрес</button>
+                <button class="btn-small" onclick="exportResults()">💾 Експорт</button>
+                <button class="btn-small" onclick="showKnowledgeBase()">📚 База знань</button>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="start-screen" class="start-screen">
+                <h2>Оберіть кримінологічний сценарій</h2>
+                <div class="warning-panel" style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                    <strong>⚠️ Важливо!</strong> Кожен сценарій фокусується на ПРОФІЛАКТИЦІ та ЗАПОБІГАННІ злочинності. 
+                    Ваші рішення впливають на довгострокові результати у громаді.
+                </div>
+                
+                <div class="scenario-list">
+                    <div class="scenario-card" onclick="startScenario('theft')">
+                        <span class="scenario-badge badge-classic">КЛАСИЧНИЙ</span>
+                        <h3>📦 Майнові злочини</h3>
+                        <p>Серія крадіжок у спальному районі. Потрібна превентивна стратегія.</p>
+                        <p style="margin-top:10px; font-size:0.85em; color:#666;">🎯 Віктимологічна профілактика</p>
+                    </div>
+                    
+                    <div class="scenario-card" onclick="startScenario('drugs')">
+                        <span class="scenario-badge badge-classic">КЛАСИЧНИЙ</span>
+                        <h3>💊 Наркозлочинність</h3>
+                        <p>Зростання наркоспоживання серед молоді. Комплексна програма.</p>
+                        <p style="margin-top:10px; font-size:0.85em; color:#666;">🎯 Загальносоціальна профілактика</p>
+                    </div>
+                    
+                    <div class="scenario-card" onclick="startScenario('youth')">
+                        <span class="scenario-badge badge-classic">КЛАСИЧНИЙ</span>
+                        <h3>👥 Ювенальна превенція</h3>
+                        <p>Підліткові "банди" та конфлікти. Робота з групами ризику.</p>
+                        <p style="margin-top:10px; font-size:0.85em; color:#666;">🎯 Індивідуальна профілактика</p>
+                    </div>
+                    
+                    <div class="scenario-card" onclick="startScenario('wartime')">
+                        <span class="scenario-badge badge-war">НОВИЙ</span>
+                        <h3>⚔️ Воєнний стан</h3>
+                        <p>Мародерство та порушення в умовах воєнного стану.</p>
+                        <p style="margin-top:10px; font-size:0.85em; color:#666;">🎯 Ситуативна профілактика</p>
+                    </div>
+                    
+                    <div class="scenario-card" onclick="startScenario('cyber')">
+                        <span class="scenario-badge badge-cyber">НОВИЙ</span>
+                        <h3>💻 Кіберзлочинність</h3>
+                        <p>Зростання онлайн-шахрайства. Захист населення.</p>
+                        <p style="margin-top:10px; font-size:0.85em; color:#666;">🎯 Інформаційна профілактика</p>
+                    </div>
+                    
+                    <div class="scenario-card" onclick="startScenario('domestic')">
+                        <span class="scenario-badge badge-new">НОВИЙ</span>
+                        <h3>🏠 Домашнє насильство</h3>
+                        <p>Раннє виявлення та попередження насильства в сім'ях.</p>
+                        <p style="margin-top:10px; font-size:0.85em; color:#666;">🎯 Віктимологічна профілактика</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Таймер для режиму часу -->
+            <div id="timer-container" class="timer-container">
+                <div class="timer-label">Час на рішення:</div>
+                <div class="timer-display" id="timer-display">45</div>
+                <div class="timer-progress">
+                    <div class="timer-progress-bar" id="timer-progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="scenarios-container"></div>
+
+            <!-- Випадкова подія -->
+            <div id="random-event-overlay" class="random-event-overlay">
+                <div class="random-event-modal">
+                    <div class="random-event-header">⚡</div>
+                    <div class="random-event-title" id="random-event-title"></div>
+                    <div class="random-event-description" id="random-event-description"></div>
+                    <div class="random-event-options" id="random-event-options"></div>
+                </div>
+            </div>
+
+            <div id="game-over" class="game-over" style="display: none;">
+                <h1>💥 ОПЕРАЦІЯ ПРОВАЛЕНА</h1>
+                <h2 id="failure-reason"></h2>
+                <p>Ваші ресурси вичерпані або довіра громади втрачена.</p>
+                <div class="buttons">
+                    <button class="btn" onclick="resetScenario()">Спробувати знову</button>
+                </div>
+            </div>
+
+            <div id="game-win" class="game-win" style="display: none;">
+                <h1>🎉 ОПЕРАЦІЯ УСПІШНА!</h1>
+                <h2 id="success-message"></h2>
+                <p id="final-stats"></p>
+                <div id="criminology-analysis" class="criminology-theory" style="margin-top: 20px; text-align: left;"></div>
+                <div class="buttons">
+                    <button class="btn" onclick="saveResults()">💾 Зберегти результати</button>
+                    <button class="btn" onclick="resetScenario()">Нова операція</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="knowledge-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('knowledge-modal')">&times;</span>
+            <h2>📚 База кримінологічних знань</h2>
+            <div class="knowledge-base">
+                <h3>Основні теорії причин злочинності</h3>
+                
+                <div class="theory-item" onclick="toggleTheory('anomie')">
+                    <strong>📖 Теорія аномії (Е. Дюркгейм, Р. Мертон)</strong>
+                    <div id="theory-anomie" class="theory-content">
+                        <p><strong>Суть:</strong> Злочинність виникає через розрив між культурними цілями суспільства та законними засобами їх досягнення.</p>
+                        <p><strong>Застосування:</strong> Економічні кризи, соціальна нерівність → зростання майнової злочинності.</p>
+                        <p><strong>Профілактика:</strong> Створення легальних можливостей для досягнення успіху, соціальна підтримка.</p>
+                    </div>
+                </div>
+
+                <div class="theory-item" onclick="toggleTheory('social-dis')">
+                    <strong>📖 Теорія соціальної дезорганізації (Чиказька школа)</strong>
+                    <div id="theory-social-dis" class="theory-content">
+                        <p><strong>Суть:</strong> Злочинність концентрується в районах зі слабким соціальним контролем.</p>
+                        <p><strong>Ознаки:</strong> Бідність, етнічна неоднорідність, висока мобільність населення.</p>
+                        <p><strong>Профілактика:</strong> Зміцнення громадських зв'язків, покращення інфраструктури.</p>
+                    </div>
+                </div>
+
+                <div class="theory-item" onclick="toggleTheory('diff-assoc')">
+                    <strong>📖 Теорія диференційованих асоціацій (Е. Сазерленд)</strong>
+                    <div id="theory-diff-assoc" class="theory-content">
+                        <p><strong>Суть:</strong> Злочинна поведінка вивчається через спілкування з носіями кримінальних цінностей.</p>
+                        <p><strong>Механізм:</strong> Чим більше контактів з девіантними особами, тим вища ймовірність злочину.</p>
+                        <p><strong>Профілактика:</strong> Розрив кримінальних зв'язків, позитивне оточення, ресоціалізація.</p>
+                    </div>
+                </div>
+
+                <div class="theory-item" onclick="toggleTheory('routine')">
+                    <strong>📖 Теорія повсякденної діяльності (Л. Коен, М. Фелсон)</strong>
+                    <div id="theory-routine" class="theory-content">
+                        <p><strong>Суть:</strong> Злочин відбувається при збігу: мотивований злочинець + підходяща ціль + відсутність охорони.</p>
+                        <p><strong>Застосування:</strong> Просторово-часовий аналіз злочинності.</p>
+                        <p><strong>Профілактика:</strong> Ситуативне запобігання, збільшення ризиків для злочинця.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 25px;">Види кримінологічної профілактики</h3>
+                
+                <div class="theory-item" onclick="toggleTheory('general-social')">
+                    <strong>🎯 Загальносоціальна профілактика</strong>
+                    <div id="theory-general-social" class="theory-content">
+                        <p>Усунення глибинних причин злочинності через соціально-економічні заходи.</p>
+                        <p><strong>Приклади:</strong> зниження безробіття, покращення освіти, соціальна підтримка.</p>
+                    </div>
+                </div>
+
+                <div class="theory-item" onclick="toggleTheory('special')">
+                    <strong>🎯 Спеціально-кримінологічна профілактика</strong>
+                    <div id="theory-special" class="theory-content">
+                        <p>Цільові заходи правоохоронних органів для запобігання конкретним видам злочинів.</p>
+                        <p><strong>Приклади:</strong> патрулювання криміногенних зон, оперативно-розшукові заходи.</p>
+                    </div>
+                </div>
+
+                <div class="theory-item" onclick="toggleTheory('individual')">
+                    <strong>🎯 Індивідуальна профілактика</strong>
+                    <div id="theory-individual" class="theory-content">
+                        <p>Робота з особами, схильними до вчинення злочинів (групи ризику).</p>
+                        <p><strong>Приклади:</strong> постановка на облік, соціальний супровід, психологічна допомога.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="progress-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('progress-modal')">&times;</span>
+            <h2>📊 Прогрес тестуючих</h2>
+            <div id="progress-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            studentName: '',
+            studentGroup: '',
+            currentScenario: '',
+            currentStage: 0,
+            budget: 0,
+            officers: 0,
+            trust: 0,
+            selectedOption: null,
+            decisions: [],
+            startTime: null,
+            resourcesHistory: [], // Історія змін ресурсів по етапах
+            randomEventsShown: [], // Які випадкові події вже показали
+            randomEventsCount: 0, // Лічильник показаних випадкових подій
+            timePressureMode: false, // Чи увімкнений режим часу
+            timerInterval: null, // Інтервал таймера
+            timeLeft: 45, // Залишок часу
+            decisionTimes: [] // Час на кожне рішення
+        };
+
+        const scenarios = {
+            theft: {
+                name: "Майнові злочини",
+                initialResources: { budget: 100, officers: 20, trust: 50 },
+                stages: [
+                    {
+                        title: "🔍 Етап 1: Аналіз ситуації",
+                        description: "За тиждень у районі сталося 15 крадіжок. Що робитимете в першу чергу?",
+                        context: "За останній тиждень у спальному районі зафіксовано 15 квартирних крадіжок. Мешканці розлючені та вимагають негайних дій. Час: переважно 10:00-16:00 (робочий час). Об'єкти: перші поверхи, старі замки. Збитки: 50-200 тис. грн на квартиру.",
+                        theory: "Теорія повсякденної діяльності - аналіз можливостей для злочину",
+                        options: [
+                            {
+                                title: "Детальний аналіз",
+                                description: "Проаналізувати всі крадіжки, виявити схему, опитати свідків, створити карту злочинів",
+                                cost: 30, officers: 8, trust: 15, result: "excellent",
+                                explanation: "✅ Відмінно! Системний аналіз дозволяє виявити закономірності. Застосовуєте теорію повсякденної діяльності - шукаєте, де збігаються мотивовані злочинці та вразливі цілі. Це основа ефективної профілактики."
+                            },
+                            {
+                                title: "Масштабні рейди",
+                                description: "Провести обшуки всіх підозрілих осіб у районі, перевірити всі під'їзди",
+                                cost: 60, officers: 15, trust: 10, result: "good",
+                                explanation: "👍 Можна краще. Рейди дають результат, але це реактивний підхід. Витрачаєте багато ресурсів без аналізу причин. Краще б спочатку зрозуміти схему роботи злочинців."
+                            },
+                            {
+                                title: "Посилене патрулювання",
+                                description: "Збільшити кількість патрулів вдень, демонстрація присутності поліції",
+                                cost: 40, officers: 12, trust: 5, result: "good",
+                                explanation: "👍 Частково ефективно. Патрулі можуть відлякати злочинців, але це тимчасовий ефект. Без аналізу вони просто зміняють час або район роботи."
+                            },
+                            {
+                                title: "Силовий тиск",
+                                description: "Жорсткі затримання всіх 'підозрілих типів', тотальні перевірки документів",
+                                cost: 80, officers: 12, trust: -20, result: "bad",
+                                explanation: "⚠️ Погано! Репресивний підхід без аналізу втрачає довіру громади. Порушення прав людини підриває легітимність поліції. Профілактика має бути законною та обґрунтованою."
+                            },
+                            {
+                                title: "Просто зареєструвати заяви",
+                                description: "Оформити документи, внести до бази, чекати розвитку подій",
+                                cost: 5, officers: 2, trust: -25, result: "terrible",
+                                explanation: "❌ Провал! Формальний бюрократичний підхід без реальних дій. Мешканці бачать вашу байдужість. Довіра до поліції обвалюється. Злочинці відчувають безкарність і активізуються. Це не профілактика - це капітуляція."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🎯 Етап 2: Розробка стратегії",
+                        description: "Аналіз показав схему роботи злочинців. Як діятимете далі?",
+                        context: "Встановлено, що злочинці працюють групою з 3-4 осіб, викрадають електроніку та коштовності, діють професійно.",
+                        theory: "Ситуативне запобігання - зменшення можливостей для злочину",
+                        options: [
+                            {
+                                title: "Прихована операція",
+                                description: "Замасковане спостереження, фіксація злочинців на гарячому, залучення інформаторів",
+                                cost: 40, officers: 10, trust: 20, result: "excellent",
+                                explanation: "✅ Ідеально! Оперативна робота без галасу. Дочекаєтесь конкретних доказів і затримаєте організовану групу. Це спеціально-кримінологічна профілактика - усунення активних злочинців."
+                            },
+                            {
+                                title: "Технічні засоби",
+                                description: "Встановлення прихованих камер, використання сучасної техніки, GPS-трекери",
+                                cost: 70, officers: 5, trust: 5, result: "good",
+                                explanation: "👍 Непогано, технології допомагають. Але дорого і не вирішує корінної проблеми. Краще комбінувати з іншими методами профілактики."
+                            },
+                            {
+                                title: "Співпраця з громадою",
+                                description: "Створити мережу інформаторів серед мешканців, чати для повідомлень про підозрілих",
+                                cost: 25, officers: 6, trust: 15, result: "good",
+                                explanation: "👍 Добре! Залучення громади підвищує контроль території. Але потрібно також активно працювати над затриманням групи."
+                            },
+                            {
+                                title: "Відкрите патрулювання",
+                                description: "Демонстративне посилення патрулів - нехай бачать і бояться",
+                                cost: 20, officers: 15, trust: -10, result: "bad",
+                                explanation: "⚠️ Помилка! Злочинці просто зачекають або зміняють район. Це не профілактика, а тимчасове витіснення проблеми. Потрібно усувати причини, а не симптоми."
+                            },
+                            {
+                                title: "Чекати на помилку злочинців",
+                                description: "Сподіватися, що вони самі зроблять помилку і попадуться",
+                                cost: 5, officers: 2, trust: -20, result: "terrible",
+                                explanation: "❌ Жахливо! Пасивне очікування - це не стратегія. Поки ви чекаєте, відбуваються нові злочини. Професійні злочинці рідко роблять помилки самі."
+                            }
+                        ]
+                    },
+                    {
+                        title: "⚡ Етап 3: Довгострокова профілактика",
+                        description: "Група затримана. Як запобігти новим крадіжкам?",
+                        context: "Злочинна група нейтралізована, але умови для крадіжок залишилися. Потрібна системна профілактика.",
+                        theory: "Віктимологічна профілактика - зменшення вразливості потенційних жертв",
+                        options: [
+                            {
+                                title: "Програма захисту житла",
+                                description: "Навчання мешканців, встановлення якісних замків, створення груп взаємодопомоги, безкоштовні консультації",
+                                cost: 50, officers: 6, trust: 30, result: "excellent",
+                                explanation: "✅ Відмінно! Віктимологічна профілактика - робота з потенційними жертвами. Підвищуєте захищеність об'єктів, навчаєте громаду. Це довгострокове рішення, яке змінює умови для злочинності."
+                            },
+                            {
+                                title: "Технічний захист",
+                                description: "Масова установка камер у під'їздах та на будинках за державний кошт",
+                                cost: 80, officers: 3, trust: 10, result: "good",
+                                explanation: "👍 Добре, але дорого і це лише один елемент. Технології без роботи з громадою менш ефективні. Потрібен комплексний підхід."
+                            },
+                            {
+                                title: "Інформаційна кампанія",
+                                description: "Листівки, лекції для мешканців про безпеку, поради у соцмережах",
+                                cost: 20, officers: 3, trust: 15, result: "good",
+                                explanation: "👍 Корисно, але недостатньо. Інформування важливе, але потрібні також практичні заходи - зміцнення замків, системи сигналізації тощо."
+                            },
+                            {
+                                title: "Тільки камери на вулицях",
+                                description: "Встановити камери на вулицях, в під'їздах не чіпати - це приватна територія",
+                                cost: 40, officers: 2, trust: -5, result: "bad",
+                                explanation: "⚠️ Половинчастий підхід! Камери на вулицях не захистять квартири. Крадіжки відбуваються всередині будинків. Втрачаєте ресурси на неефективні заходи."
+                            },
+                            {
+                                title: "Сподіватися на краще",
+                                description: "Злочинці спіймані, проблема вирішена, більше нічого не треба",
+                                cost: 10, officers: 1, trust: -15, result: "terrible",
+                                explanation: "❌ Провал! Без системних змін з'являться нові злочинці. Ви не усунули причини - слабкий захист житла, низька обізнаність мешканців. Профілактика - це не разові акції, а постійна робота."
+                            }
+                        ]
+                    }
+                ]
+            },
+            drugs: {
+                name: "Наркозлочинність",
+                initialResources: { budget: 120, officers: 18, trust: 60 },
+                stages: [
+                    {
+                        title: "🚨 Етап 1: Виявлення проблеми",
+                        description: "Батьки повідомляють про торгівлю наркотиками біля школи. Ваші дії?",
+                        context: "Батьки учнів місцевої школи скаржаться на підозрілих людей, які 'щось продають' дітям біля навчального закладу. Час активності: до і після занять. Вік покупців: 14-18 років. Кількість скарг: 12 за місяць.",
+                        theory: "Загальносоціальна профілактика - робота з середовищем",
+                        options: [
+                            {
+                                title: "Ретельне розслідування",
+                                description: "Таємне спостереження, збір доказів, встановлення особистостей торговців та каналів постачання",
+                                cost: 25, officers: 5, trust: 15, result: "excellent",
+                                explanation: "✅ Правильно! Професійний підхід. Спочатку збираєте докази, встановлюєте канали постачання. Це дозволить не просто спіймати дрібних торговців, а вийти на організаторів. Спеціально-кримінологічна профілактика."
+                            },
+                            {
+                                title: "Співпраця зі школою",
+                                description: "Організувати спільні рейди з адміністрацією школи, підключити шкільного психолога",
+                                cost: 40, officers: 8, trust: 5, result: "good",
+                                explanation: "👍 Непогано, міжвідомча взаємодія важлива. Але без правильного розслідування можете спалити операцію. Краще було б спочатку зібрати інформацію."
+                            },
+                            {
+                                title: "Профілактичні бесіди",
+                                description: "Провести лекції в школі про шкоду наркотиків, розповісти про відповідальність",
+                                cost: 15, officers: 3, trust: 10, result: "good",
+                                explanation: "👍 Корисно для освіти, але недостатньо для вирішення проблеми. Поки торговці на волі, проблема не зникне. Потрібні конкретні дії з затримання."
+                            },
+                            {
+                                title: "Масові обшуки",
+                                description: "Обшукати всіх підозрілих біля школи, перевірити учнів на наркотики без попередження",
+                                cost: 60, officers: 15, trust: -10, result: "bad",
+                                explanation: "⚠️ Погана ідея! Обшуки дітей без підстав - порушення прав. Втрачаєте довіру і батьків, і підлітків. Стигматизація може лише погіршити ситуацію. Теорія етикетування попереджає про такі помилки."
+                            },
+                            {
+                                title: "Не втручатися поки немає жертв",
+                                description: "Чекати поки хтось постраждає, тоді буде привід для дій",
+                                cost: 0, officers: 0, trust: -30, result: "terrible",
+                                explanation: "❌ Жахливо! Наркозлочинність - це не та сфера, де можна чекати. Кожен день затримки - це нові наркозалежні діти. Профілактика означає ЗАПОБІГАННЯ, а не реагування на трагедії."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🎓 Етап 2: Профілактична робота",
+                        description: "Торговці затримані. Як працювати з підлітками, які вже спробували наркотики?",
+                        context: "Виявлено 8 учнів, які вживали легкі наркотики. Потрібна індивідуальна робота.",
+                        theory: "Індивідуальна профілактика - робота з групою ризику",
+                        options: [
+                            {
+                                title: "Комплексна програма",
+                                description: "Психологи, нарколог, соціальний супровід, залучення батьків, конфіденційність, добровільна участь",
+                                cost: 50, officers: 6, trust: 25, result: "excellent",
+                                explanation: "✅ Відмінно! Індивідуальний підхід без стигматизації. Робота з причинами вживання (проблеми в сім'ї, соціальна ізоляція). Це справжня профілактика рецидиву та переходу до важких наркотиків."
+                            },
+                            {
+                                title: "Реабілітаційні групи",
+                                description: "Створити групи підтримки для підлітків з досвідом вживання, спільні заняття",
+                                cost: 35, officers: 4, trust: 20, result: "good",
+                                explanation: "👍 Добра ідея! Групова терапія ефективна. Підлітки бачать, що не самі з проблемою. Але потрібно уважно формувати групи, щоб не створити 'школу наркоманів'."
+                            },
+                            {
+                                title: "Лекції про шкоду",
+                                description: "Провести освітні заходи про небезпеку наркотиків для всієї школи",
+                                cost: 20, officers: 3, trust: 10, result: "good",
+                                explanation: "👍 Освіта важлива, але недостатня. Підлітки, які вже вживають, потребують більше ніж лекцій. Потрібна індивідуальна робота. Але для первинної профілактики - непогано."
+                            },
+                            {
+                                title: "Постановка на облік",
+                                description: "Офіційно поставити на облік всіх виявлених, регулярні перевірки, звітність",
+                                cost: 30, officers: 8, trust: -20, result: "bad",
+                                explanation: "⚠️ Небезпечно! Теорія етикетування: 'ярлик наркомана' може закріпити девіантну ідентичність. Підлітки можуть піти глибше в субкультуру. Потрібна допомога, а не репресії."
+                            },
+                            {
+                                title: "Викликати батьків і все",
+                                description: "Просто повідомити батькам про проблему, нехай самі вирішують",
+                                cost: 5, officers: 1, trust: -15, result: "terrible",
+                                explanation: "❌ Провал! Часто проблеми підлітків ідуть саме з сім'ї. Без професійної допомоги ситуація може погіршитися. Батьки можуть не знати як правильно реагувати. Потрібна комплексна підтримка."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🌍 Етап 3: Системна профілактика",
+                        description: "Як створити середовище, несприятливе для наркозлочинності?",
+                        context: "Разова операція успішна, але потрібна довгострокова стратегія для всього району.",
+                        theory: "Загальносоціальна профілактика через створення альтернатив",
+                        options: [
+                            {
+                                title: "Молодіжна інфраструктура",
+                                description: "Безкоштовні спортивні секції, творчі гуртки, молодіжні центри, робота з активістами, дозвілля",
+                                cost: 70, officers: 4, trust: 35, result: "excellent",
+                                explanation: "✅ Ідеально! Теорія аномії: надаєте легітимні способи самореалізації. Створюєте альтернативу наркотикам. Довгострокове рішення, яке змінює соціальне середовище. Це справжня загальносоціальна профілактика."
+                            },
+                            {
+                                title: "Освітня програма",
+                                description: "Постійні лекції в школах, інтерактивні заняття, залучення колишніх наркозалежних",
+                                cost: 40, officers: 3, trust: 20, result: "good",
+                                explanation: "👍 Корисно! Освіта формує установки. Досвід людей, що подолали залежність, впливає на підлітків. Але потрібно також створювати альтернативи."
+                            },
+                            {
+                                title: "Жорсткий контроль",
+                                description: "Регулярні рейди біля шкіл, камери спостереження, залякування потенційних торговців",
+                                cost: 90, officers: 12, trust: -5, result: "good",
+                                explanation: "👍 Стримує, але не вирішує проблему. Попит залишається, торгівля переміститься. Без роботи з причинами вживання - тимчасовий ефект."
+                            },
+                            {
+                                title: "Періодичні перевірки",
+                                description: "Раз на місяць проводити рейди біля шкіл, решту часу - звичайне патрулювання",
+                                cost: 25, officers: 5, trust: 5, result: "bad",
+                                explanation: "⚠️ Недостатньо! Епізодичні заходи не створюють системи. Торговці легко пристосуються до графіка. Потрібна постійна, комплексна робота, а не разові акції."
+                            },
+                            {
+                                title: "Просто затримали торговців",
+                                description: "Проблема вирішена, більше нічого робити не треба",
+                                cost: 10, officers: 1, trust: -20, result: "terrible",
+                                explanation: "❌ Провал! Наркозлочинність - системна проблема. Без профілактики з'являться нові торговці, а попит серед підлітків залишиться. Потрібні зміни в соціальному середовищі."
+                            }
+                        ]
+                    }
+                ]
+            },
+            youth: {
+                name: "Ювенальна превенція",
+                initialResources: { budget: 90, officers: 25, trust: 45 },
+                stages: [
+                    {
+                        title: "👮 Етап 1: Виклик на місце",
+                        description: "Група підлітків влаштувала бійку в парку. Як реагуватимете?",
+                        context: "У парку відбулася масова бійка між двома групами підлітків 15-17 років. Є потерпілі, пошкоджено майно. На місці: 15 підлітків з двох 'банд', 3 потерпілих (легкі травми), розбито 2 лавки, пошкоджений дитмайданчик.",
+                        theory: "Ювенальна превенція - особливості роботи з неповнолітніми",
+                        options: [
+                            {
+                                title: "Діалог та розбірки",
+                                description: "Розібратися в причинах конфлікту, поговорити з лідерами груп, залучити батьків, шкільних психологів",
+                                cost: 20, officers: 6, trust: 20, result: "excellent",
+                                explanation: "✅ Правильно! З підлітками важливо говорити, а не карати. З'ясування причин конфлікту - основа профілактики. Застосовуєте принципи відновного правосуддя. Це запобігає ескалації та стигматизації."
+                            },
+                            {
+                                title: "Селективний підхід",
+                                description: "Затримати тільки зачинщиків, з рештою провести профілактичну бесіду, зібрати свідків",
+                                cost: 30, officers: 8, trust: 10, result: "good",
+                                explanation: "👍 Розумний баланс. Відповідальність для ініціаторів, але без масових репресій. Проте краще було б більше уваги приділити причинам конфлікту."
+                            },
+                            {
+                                title: "Примирення на місці",
+                                description: "Організувати зустріч обох груп, спробувати домовитися, вибачення потерпілим",
+                                cost: 15, officers: 4, trust: 15, result: "good",
+                                explanation: "👍 Відновне правосуддя - хороший підхід! Але для успіху потрібна підготовка. Без розуміння глибинних причин конфлікту примирення може бути поверхневим."
+                            },
+                            {
+                                title: "Масові затримання",
+                                description: "Затримати всіх учасників бійки для розслідування, доставити до відділення",
+                                cost: 40, officers: 10, trust: -15, result: "bad",
+                                explanation: "⚠️ Погано! Масова криміналізація підлітків. Теорія етикетування: можете перетворити звичайний підлітковий конфлікт на серйозну проблему. Ризик створення 'злочинної ідентичності'."
+                            },
+                            {
+                                title: "Просто розігнати",
+                                description: "Розігнати групи, сказати щоб більше так не робили, і поїхати",
+                                cost: 5, officers: 2, trust: -25, result: "terrible",
+                                explanation: "❌ Провал! Проблема не вирішена, конфлікт загнано вглиб. Через тиждень буде нова бійка, можливо з серйознішими наслідками. Підлітки бачать, що можна все робити безкарно."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🔍 Етап 2: Розслідування причин",
+                        description: "З'ясувалося, що це не перша бійка. Як вирішувати проблему?",
+                        context: "Конфлікт триває вже 2 місяці, пов'язаний з територіальними суперечками. Підлітки з різних дворів.",
+                        theory: "Теорія соціальної дезорганізації - слабкий соціальний контроль",
+                        options: [
+                            {
+                                title: "Комплексна програма",
+                                description: "Залучити соціальних працівників, психологів, організувати спільні заходи для груп, медіація",
+                                cost: 50, officers: 6, trust: 25, result: "excellent",
+                                explanation: "✅ Відмінно! Міжвідомча взаємодія. Психологи працюють з агресією, соцпрацівники - з родинами. Спільні заходи руйнують стереотипи між групами. Це справжня індивідуальна профілактика."
+                            },
+                            {
+                                title: "Спортивна альтернатива",
+                                description: "Організувати спортивні змагання між районами, перенаправити енергію в мирне русло",
+                                cost: 30, officers: 4, trust: 15, result: "good",
+                                explanation: "👍 Добра ідея, спорт - хороша альтернатива насильству. Але без роботи з глибинними причинами конфлікту ефект може бути тимчасовим."
+                            },
+                            {
+                                title: "Робота з лідерами",
+                                description: "Зосередитися на лідерах груп, дати їм відповідальність за поведінку групи",
+                                cost: 25, officers: 3, trust: 20, result: "good",
+                                explanation: "👍 Розумний підхід! Лідери впливають на групу. Якщо їх переорієнтувати, група піде за ними. Але потрібна також робота з іншими учасниками."
+                            },
+                            {
+                                title: "Жорсткий контроль",
+                                description: "Посилити патрулювання районів, встановити комендантську годину для неповнолітніх",
+                                cost: 60, officers: 12, trust: -20, result: "bad",
+                                explanation: "⚠️ Репресивний підхід не працює з підлітками. Заборони без альтернатив посилюють протест. Потрібна робота з причинами агресії, а не придушення симптомів."
+                            },
+                            {
+                                title: "Погрожувати покаранням",
+                                description: "Викликати підлітків та батьків, погрожувати кримінальною відповідальністю за нові бійки",
+                                cost: 10, officers: 2, trust: -15, result: "terrible",
+                                explanation: "❌ Провал! Погрози без розв'язання конфлікту не працюють. Підлітки просто стануть обережнішими, але конфлікт продовжиться. Теорія етикетування: можете зробити з них 'справжніх злочинців'."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🤝 Етап 3: Довгострокове рішення",
+                        description: "Як забезпечити мир між групами на довго?",
+                        context: "Активна фаза конфлікту зупинена, але потрібні заходи для запобігання нових інцидентів.",
+                        theory: "Зміцнення соціальних зв'язків - профілактика груповихконфліктів",
+                        options: [
+                            {
+                                title: "Молодіжна рада",
+                                description: "Створити молодіжну раду при поліції з представників обох груп, дати їм відповідальність, регулярні зустрічі",
+                                cost: 40, officers: 3, trust: 30, result: "excellent",
+                                explanation: "✅ Ідеально! Залучення підлітків до конструктивної діяльності. Даєте їм статус та відповідальність. Колишні вороги стають партнерами. Це змінює ідентичність групи з девіантної на просоціальну."
+                            },
+                            {
+                                title: "Спільні проєкти",
+                                description: "Організувати спільні волонтерські проєкти для обох груп - прибирання району, допомога літнім",
+                                cost: 30, officers: 2, trust: 25, result: "good",
+                                explanation: "👍 Добре! Спільна мета об'єднує. Підлітки бачать один одного з іншого боку. Позитивна діяльність змінює репутацію груп. Але потрібна постійна підтримка."
+                            },
+                            {
+                                title: "Регулярний моніторинг",
+                                description: "Встановити регулярні перевірки та бесіди з підлітками з груп ризику",
+                                cost: 25, officers: 5, trust: 15, result: "good",
+                                explanation: "👍 Контроль потрібен, але це не розв'язує проблему. Без позитивної альтернативи та залучення підлітків - тимчасовий ефект."
+                            },
+                            {
+                                title: "Заборона контактів",
+                                description: "Заборонити підліткам з різних груп спілкуватися, патрулювати місця зустрічей",
+                                cost: 50, officers: 10, trust: -10, result: "bad",
+                                explanation: "⚠️ Нереалістично і контрпродуктивно! Підлітки живуть в одному районі, ходять до однієї школи. Заборони викличуть опір. Потрібна інтеграція, а не сегрегація."
+                            },
+                            {
+                                title: "Сподівання на краще",
+                                description: "Проблема вирішена, вони самі помиряться з часом, додаткові заходи не потрібні",
+                                cost: 10, officers: 1, trust: -10, result: "terrible",
+                                explanation: "❌ Провал профілактики! Без системної роботи конфлікт спалахне знову, можливо з ще гіршими наслідками. Підліткові групи потребують постійної уваги та конструктивних альтернатив."
+                            }
+                        ]
+                    }
+                ]
+            },
+            wartime: {
+                name: "Злочинність у воєнний час",
+                initialResources: { budget: 80, officers: 15, trust: 55 },
+                stages: [
+                    {
+                        title: "⚠️ Етап 1: Мародерство після обстрілу",
+                        description: "Після нічного обстрілу у пошкодженому районі фіксуються випадки мародерства. Як організуєте профілактику?",
+                        context: "Населення в стресі, частина евакуювалася. 5 пошкоджених будинків, магазини зачинені. Потрібне швидке реагування.",
+                        theory: "Ситуативна профілактика в умовах надзвичайних ситуацій",
+                        options: [
+                            {
+                                title: "Швидке реагування + громада",
+                                description: "Посилене патрулювання, встановлення блокпостів, робота з місцевими активістами, створення чатів",
+                                cost: 30, officers: 8, trust: 15, result: "excellent",
+                                explanation: "✅ Правильно! Швидка реакція + залучення громади = ефективна превенція. Теорія повсякденної діяльності: усуваємо можливості для злочину. Громадські активісти - 'природні охоронці' території."
+                            },
+                            {
+                                title: "Інформаційна кампанія",
+                                description: "Попередження через громадські чати про відповідальність, камери спостереження, онлайн-моніторинг",
+                                cost: 15, officers: 4, trust: 10, result: "good",
+                                explanation: "👍 Непогано, але недостатньо в кризовій ситуації. Потрібен фізичний контроль території. Інформування важливе, але як додаток до реальних дій."
+                            },
+                            {
+                                title: "Залучення волонтерів",
+                                description: "Організувати волонтерів для охорони пошкоджених будинків, координація з поліцією",
+                                cost: 20, officers: 5, trust: 20, result: "good",
+                                explanation: "👍 Добре! Громада бере відповідальність. Але волонтери потребують координації та правової підтримки. Важливо не допустити самосуду."
+                            },
+                            {
+                                title: "Жорсткі заходи",
+                                description: "Комендантська година, затримання підозрілих, обшуки без попередження",
+                                cost: 40, officers: 12, trust: -20, result: "bad",
+                                explanation: "⚠️ Надмірна жорсткість втрачає довіру населення. У кризі важлива підтримка, а не репресії. Люди і так у стресі, додаткове насильство з боку держави руйнує легітимність."
+                            },
+                            {
+                                title: "Не втручатися активно",
+                                description: "Люди самі розберуться, просто зареєструвати заяви про мародерство постфактум",
+                                cost: 5, officers: 2, trust: -30, result: "terrible",
+                                explanation: "❌ Катастрофа! У надзвичайній ситуації відсутність держави призводить до анархії. Мародерство стає масовим, довіра до влади обвалюється. Це момент, коли потрібна максимальна присутність."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🔍 Етап 2: Профілактика повторних інцидентів",
+                        description: "Ситуація стабілізована. Як запобігти новим випадкам мародерства при наступних обстрілах?",
+                        context: "Потрібна система, яка спрацює автоматично при наступних надзвичайних ситуаціях.",
+                        theory: "Довгострокова ситуативна профілактика",
+                        options: [
+                            {
+                                title: "Система швидкого реагування",
+                                description: "Чергові групи, мережа інформаторів з числа мешканців, GPS-моніторинг, чіткі протоколи дій",
+                                cost: 35, officers: 6, trust: 20, result: "excellent",
+                                explanation: "✅ Відмінно! Створення стійкої системи запобігання. Залучення громади підвищує контроль. Технології + соціальний контроль = ефективна профілактика."
+                            },
+                            {
+                                title: "Технічні засоби",
+                                description: "Встановлення камер у критичних точках, системи сигналізації, онлайн-моніторинг",
+                                cost: 45, officers: 3, trust: 5, result: "good",
+                                explanation: "👍 Технології допомагають, але без громади менш ефективні. У надзвичайних ситуаціях може не бути електрики. Потрібна соціальна складова."
+                            },
+                            {
+                                title: "Навчання активістів",
+                                description: "Тренінги для місцевих лідерів, як діяти при обстрілах, координація з поліцією",
+                                cost: 25, officers: 4, trust: 25, result: "good",
+                                explanation: "👍 Добре! Підготовлена громада - найкраща профілактика. Але також потрібна система швидкого реагування самої поліції."
+                            },
+                            {
+                                title: "Епізодичні перевірки",
+                                description: "Іноді патрулювати після обстрілів, коли є час і ресурси",
+                                cost: 15, officers: 3, trust: -10, result: "bad",
+                                explanation: "⚠️ Несистемний підхід неефективний. Мародери швидко зрозуміють, коли є патрулі, а коли немає. Потрібна постійна система, а не разові акції."
+                            },
+                            {
+                                title: "Покластися на обставини",
+                                description: "Сподіватися, що люди самі зрозуміють. Мінімальні витрати, мінімальні зусилля",
+                                cost: 10, officers: 2, trust: -15, result: "terrible",
+                                explanation: "❌ Пасивність у профілактиці гарантує нові злочини. Без системи контролю проблема повториться з кожним обстрілом. У кризі особливо важлива організація."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🤝 Етап 3: Робота з громадою",
+                        description: "Як налагодити співпрацю з населенням для самоорганізації захисту?",
+                        context: "Поліція не може бути всюди. Потрібна активна участь мешканців.",
+                        theory: "Соціальна дезорганізація → організація громади",
+                        options: [
+                            {
+                                title: "Громадські патрулі",
+                                description: "Навчання активістів, створення чатів тривоги, координація з поліцією, правова підтримка, радіозв'язок",
+                                cost: 25, officers: 4, trust: 30, result: "excellent",
+                                explanation: "✅ Ідеально! Теорія соціального контролю: сильна громада = низька злочинність. Створюєте стійку систему взаємодопомоги. Це найефективніша профілактика в довгостроковій перспективі."
+                            },
+                            {
+                                title: "Програма 'Безпечний двір'",
+                                description: "Кожен двір має відповідальну групу мешканців, організовані зустрічі, план дій",
+                                cost: 30, officers: 3, trust: 25, result: "good",
+                                explanation: "👍 Добре! Децентралізована система контролю. Мешканці знають свою територію краще. Але потрібна постійна координація з поліцією."
+                            },
+                            {
+                                title: "Інформування",
+                                description: "Регулярні зустрічі, інструкції що робити при обстрілах, гаряча лінія",
+                                cost: 15, officers: 2, trust: 15, result: "good",
+                                explanation: "👍 Добре, але пасивний підхід. Активна участь громади ефективніша за пасивне інформування. Люди повинні бути суб'єктами, а не об'єктами."
+                            },
+                            {
+                                title: "Тільки поліція",
+                                description: "Громада не повинна втручатися, це робота поліції, посилити патрулі",
+                                cost: 50, officers: 10, trust: -10, result: "bad",
+                                explanation: "⚠️ Помилка! Без громади неможливо контролювати великі території, особливо в кризі. Витрачаєте ресурси даремно. Поліція має бути частиною громади, а не замінювати її."
+                            },
+                            {
+                                title: "Нічого не робити",
+                                description: "Люди самі розберуться як організуватися, якщо захочуть",
+                                cost: 5, officers: 1, trust: -25, result: "terrible",
+                                explanation: "❌ Провал! У надзвичайних ситуаціях люди потребують координації та підтримки держави. Без організації виникає хаос або самосуд. Держава повинна бути лідером у профілактиці."
+                            }
+                        ]
+                    }
+                ]
+            },
+            cyber: {
+                name: "Кіберзлочинність",
+                initialResources: { budget: 100, officers: 12, trust: 50 },
+                stages: [
+                    {
+                        title: "💻 Етап 1: Хвиля фішингу",
+                        description: "У місті різко зросла кількість онлайн-шахрайств. Пенсіонери втрачають заощадження. Як реагуєте?",
+                        context: "За тиждень 47 заяв про шахрайство. Середня втрата - 15 тис. грн. Жертви - переважно 60+. Схема: дзвінки від 'банку', 'поліції', 'СБУ'.",
+                        theory: "Віктимологічна профілактика + інформаційна безпека",
+                        options: [
+                            {
+                                title: "Освітня кампанія для вразливих груп",
+                                description: "Семінари для літніх людей, розповсюдження пам'яток, робота через пенсійний фонд та поліклініки, волонтери",
+                                cost: 35, officers: 5, trust: 25, result: "excellent",
+                                explanation: "✅ Відмінно! Віктимологічна профілактика - зменшуємо вразливість потенційних жертв через освіту. Працюєте там, де є цільова аудиторія. Це проактивна профілактика."
+                            },
+                            {
+                                title: "Технічне рішення + банки",
+                                description: "Система автоматичного виявлення підозрілих дзвінків, співпраця з банками для блокування",
+                                cost: 60, officers: 2, trust: 10, result: "good",
+                                explanation: "👍 Технології допомагають, але без інформування населення - неповний ефект. Шахраї змінюють схеми. Потрібне підвищення обізнаності."
+                            },
+                            {
+                                title: "Медійна кампанія",
+                                description: "Реклама по ТБ, радіо, соцмережі - попередження про схеми шахрайства",
+                                cost: 40, officers: 3, trust: 15, result: "good",
+                                explanation: "👍 Добре, але ефективність залежить від аудиторії. Літні люди не завжди користуються соцмережами. Потрібні прямі контакти."
+                            },
+                            {
+                                title: "Розслідування",
+                                description: "Зосередитися на пошуку шахраїв, створити спецгрупу, міжнародна співпраця",
+                                cost: 50, officers: 8, trust: 5, result: "bad",
+                                explanation: "⚠️ Реактивний підхід. Поки шукаєте шахраїв (часто за кордоном), жертв стає більше. Потрібна ПРОФІЛАКТИКА. Розслідування важливе, але не замінює превенції."
+                            },
+                            {
+                                title: "Просто зареєструвати заяви",
+                                description: "Прийняти заяви, внести в базу, направити до слідства. Жертви самі винні",
+                                cost: 10, officers: 2, trust: -30, result: "terrible",
+                                explanation: "❌ Жорстоко і неефективно! Літні люди - вразлива група, яка потребує захисту. Без профілактики кількість жертв зростатиме експоненціально. Це провал віктимологічної профілактики."
+                            }
+                        ]
+                    },
+                    {
+                        title: "📱 Етап 2: Telegram-шахрайство",
+                        description: "Через фейкові канали продають неіснуючі товари. Як боротися з новою схемою?",
+                        context: "Молодь втрачає гроші, купуючи товари через 'надійні' Telegram-канали з відгуками. Схема: передоплата, блокування.",
+                        theory: "Інформаційна профілактика в цифровому просторі",
+                        options: [
+                            {
+                                title: "Медіа-кампанія з інфлюенсерами",
+                                description: "Співпраця з блогерами, відео-попередження, viral-контент про безпеку, TikTok та Instagram, челенджі",
+                                cost: 40, officers: 3, trust: 20, result: "excellent",
+                                explanation: "✅ Сучасний підхід! Використовуєте канали комунікації цільової аудиторії. Профілактика там, де люди проводять час. Блогери мають більше довіри у молоді, ніж офіційні джерела."
+                            },
+                            {
+                                title: "Освіта в школах",
+                                description: "Інтерактивні уроки цифрової безпеки, практичні кейси, залучення постраждалих",
+                                cost: 30, officers: 4, trust: 25, result: "good",
+                                explanation: "👍 Добре! Формуєте культуру безпеки з юності. Але охоплення тільки учнів, а молодь поза школою залишається вразливою."
+                            },
+                            {
+                                title: "Офіційні заяви",
+                                description: "Прес-конференції, офіційні повідомлення поліції, статті в ЗМІ",
+                                cost: 20, officers: 2, trust: 10, result: "good",
+                                explanation: "👍 Класичний підхід працює, але охоплення молодіжі буде нижчим. Офіційні канали часто ігноруються молоддю. Потрібні сучасні методи."
+                            },
+                            {
+                                title: "Блокування каналів",
+                                description: "Пошук та блокування підозрілих Telegram-каналів, технічні заходи",
+                                cost: 45, officers: 7, trust: -5, result: "bad",
+                                explanation: "⚠️ Гра в кішки-мишки. Нові канали з'являються швидше ніж блокуєте. Потрібна робота з аудиторією - підвищення критичного мислення, а не технічна гонка."
+                            },
+                            {
+                                title: "Ігнорувати - молодь сама розбереться",
+                                description: "Молоді люди технічно грамотні, самі зрозуміють де шахрайство",
+                                cost: 5, officers: 1, trust: -20, result: "terrible",
+                                explanation: "❌ Небезпечна помилка! Технічна грамотність не дорівнює критичному мисленню. Шахраї використовують соціальну інженерію, а не технічні вразливості. Навіть молодь потребує освіти про безпеку."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🎓 Етап 3: Системна профілактика",
+                        description: "Як створити довгострокову систему захисту від кіберзлочинності?",
+                        context: "Схеми шахрайства постійно змінюються. Потрібна стійка система.",
+                        theory: "Системна профілактика через множинні канали",
+                        options: [
+                            {
+                                title: "Освітня екосистема",
+                                description: "Уроки кібербезпеки в школах, курси для дорослих, постійна інфокампанія, онлайн-курси, мобільний додаток",
+                                cost: 45, officers: 4, trust: 35, result: "excellent",
+                                explanation: "✅ Ідеально! Системний підхід формує культуру безпеки. Інвестиція в довгострокову превенцію. Освічене населення - найкращий захист від шахрайства."
+                            },
+                            {
+                                title: "Партнерство з бізнесом",
+                                description: "Співпраця з банками, операторами зв'язку, IT-компаніями для комплексного захисту",
+                                cost: 50, officers: 3, trust: 25, result: "good",
+                                explanation: "👍 Добре! Залучення приватного сектору підсилює профілактику. Але без просвіти населення технології дають обмежений ефект."
+                            },
+                            {
+                                title: "Гаряча лінія + моніторинг",
+                                description: "Цілодобова підтримка, база відомих схем, швидкі попередження в месенджерах",
+                                cost: 35, officers: 5, trust: 20, result: "good",
+                                explanation: "👍 Добра реактивна система, але краще комбінувати з освітою для проактивного ефекту. Гаряча лінія допомагає, але не запобігає."
+                            },
+                            {
+                                title: "Періодичні нагадування",
+                                description: "Раз на місяць пости в соцмережах, базові поради, мінімальні зусилля",
+                                cost: 15, officers: 1, trust: 5, result: "bad",
+                                explanation: "⚠️ Мінімалізм у профілактиці = мінімальний ефект. Кіберзлочинність розвивається швидше. Потрібна постійна, інтенсивна робота з населенням."
+                            },
+                            {
+                                title: "Сподіватися на здоровий глузд",
+                                description: "Люди мають розуміти самі, що не треба переводити гроші незнайомим",
+                                cost: 5, officers: 0, trust: -25, result: "terrible",
+                                explanation: "❌ Повний провал! Шахраї використовують психологічні вразливості, страх, довіру до авторитетів. Навіть освічені люди потрапляються. Без системної профілактики втрати зростатимуть."
+                            }
+                        ]
+                    }
+                ]
+            },
+            domestic: {
+                name: "Домашнє насильство",
+                initialResources: { budget: 90, officers: 18, trust: 40 },
+                stages: [
+                    {
+                        title: "🚨 Етап 1: Виклик на місце",
+                        description: "Сусіди повідомили про сварку та крики з квартири. Прибувши, бачите переляканих дітей та жінку зі слідами побоїв.",
+                        context: "Чоловік агресивний, у стані алкогольного сп'яніння. Жінка не хоче писати заяву, боїться помсти. Діти (6 та 9 років) у шоковому стані.",
+                        theory: "Віктимологічна профілактика + захист прав постраждалих",
+                        options: [
+                            {
+                                title: "Комплексний підхід",
+                                description: "Тимчасове обмеження для агресора, психолог для жертви, інформування про кризові центри, робота з дітьми, соціальний супровід",
+                                cost: 30, officers: 6, trust: 20, result: "excellent",
+                                explanation: "✅ Правильно! Захист жертви + робота з агресором + інформування про підтримку. Віктимологічна профілактика повторних випадків. Важливо працювати з дітьми - свідки насильства часто стають жертвами або агресорами."
+                            },
+                            {
+                                title: "Термінове вилучення дітей",
+                                description: "Негайно забрати дітей із сім'ї, оформити опіку, жінці дати вибір",
+                                cost: 35, officers: 5, trust: 0, result: "good",
+                                explanation: "👍 Захист дітей важливий, але травматичний. Краще спочатку спробувати комплексний підхід з підтримкою всієї сім'ї. Вилучення - крайній захід."
+                            },
+                            {
+                                title: "Обмежувальний припис",
+                                description: "Термінове обмеження для кривдника, заборона наближатися до жертви, поліцейський патронаж",
+                                cost: 25, officers: 4, trust: 15, result: "good",
+                                explanation: "👍 Добре для термінового захисту. Але потрібна також психологічна підтримка жертви та робота з агресором. Один припис не вирішить проблему."
+                            },
+                            {
+                                title: "Профілактична бесіда",
+                                description: "Поговорити з обома, застережити кривдника, роз'яснити закон, записати дані",
+                                cost: 10, officers: 2, trust: 5, result: "bad",
+                                explanation: "⚠️ Недостатньо! Без реальних заходів захисту жертва залишається в небезпеці. Високий ризик повторення та ескалації насильства. Бесіди не працюють з агресорами."
+                            },
+                            {
+                                title: "Не втручатися",
+                                description: "Це сімейна справа, поки не буде заяви - нічого не робити",
+                                cost: 0, officers: 0, trust: -30, result: "terrible",
+                                explanation: "❌ Жахливо! Домашнє насильство - не приватна справа. Жертви часто не можуть написати заяву через страх. Діти в небезпеці. Невтручання може призвести до трагедії. Це провал захисту прав людини."
+                            }
+                        ]
+                    },
+                    {
+                        title: "🔍 Етап 2: Виявлення латентних випадків",
+                        description: "У районі високий рівень латентного домашнього насильства. Як виявити приховані випадки?",
+                        context: "За статистикою, більшість жертв не звертаються в поліцію через страх, сором, економічну залежність.",
+                        theory: "Раннє виявлення через міжвідомчу взаємодію",
+                        options: [
+                            {
+                                title: "Мережа раннього виявлення",
+                                description: "Навчання лікарів, вчителів, соцпрацівників розпізнавати ознаки. Конфіденційна гаряча лінія, протоколи дій",
+                                cost: 40, officers: 4, trust: 25, result: "excellent",
+                                explanation: "✅ Відмінно! Системний підхід через множинні канали. Раннє виявлення = раннє втручання = профілактика ескалації. Лікарі бачать травми, вчителі - зміни поведінки дітей."
+                            },
+                            {
+                                title: "Аутріч-робота",
+                                description: "Виїзні консультації соціальних працівників у криміногенні райони, довірчі бесіди",
+                                cost: 35, officers: 5, trust: 20, result: "good",
+                                explanation: "👍 Проактивний підхід! Працюєте з групами ризику безпосередньо. Але потрібно більше часу для встановлення довіри."
+                            },
+                            {
+                                title: "Опитування населення",
+                                description: "Анонімні опитувальники в поліклініках, школах про безпеку в сім'ї",
+                                cost: 25, officers: 3, trust: 15, result: "good",
+                                explanation: "👍 Дає статистику, але пасивний метод. Краще комбінувати з активними каналами виявлення. Не всі заповнять опитувальник."
+                            },
+                            {
+                                title: "Тільки у разі видимих травм",
+                                description: "Реагувати коли лікарі повідомляють про підозрілі травми",
+                                cost: 15, officers: 2, trust: 0, result: "bad",
+                                explanation: "⚠️ Недостатньо! Більшість випадків психологічного насильства та контролю залишаються непоміченими. Фізичні травми - це вже ескалація."
+                            },
+                            {
+                                title: "Чекати на заяви",
+                                description: "Реагувати тільки на офіційні звернення, не втручатися в сімейні справи",
+                                cost: 5, officers: 2, trust: -15, result: "terrible",
+                                explanation: "❌ Провал профілактики! Більшість жертв не звертаються через страх. Пасивність = залишаєте їх без допомоги. Насильство ескалює до трагедій. 70% жертв ніколи не звертаються офіційно."
+                            }
+                        ]
+                    },
+                    {
+                        title: "📚 Етап 3: Профілактична програма",
+                        description: "Як побудувати системну профілактику домашнього насильства в громаді?",
+                        context: "Потрібна довгострокова стратегія, яка змінить ставлення суспільства до проблеми.",
+                        theory: "Загальносоціальна + індивідуальна профілактика",
+                        options: [
+                            {
+                                title: "Комплексна програма",
+                                description: "Освітні кампанії, підтримка жертв, програми для агресорів, робота з підлітками про здорові стосунки, кризові центри",
+                                cost: 55, officers: 5, trust: 35, result: "excellent",
+                                explanation: "✅ Ідеально! Багаторівнева профілактика: освіта суспільства + робота з групами ризику + реабілітація. Довгостроковий ефект. Робота з підлітками - первинна профілактика майбутнього насильства."
+                            },
+                            {
+                                title: "Програма для молоді",
+                                description: "Уроки про здорові стосунки в школах, тренінги для молодих пар, онлайн-ресурси",
+                                cost: 40, officers: 3, trust: 30, result: "good",
+                                explanation: "👍 Дуже добре! Первинна профілактика - найефективніша. Формуєте правильні установки до того, як з'являться проблеми. Але потрібна також допомога вже постраждалим."
+                            },
+                            {
+                                title: "Кризові центри",
+                                description: "Створення притулків та центрів психологічної допомоги для жертв, гаряча лінія 24/7",
+                                cost: 45, officers: 3, trust: 20, result: "good",
+                                explanation: "👍 Важливий елемент, але це швидше допомога жертвам, ніж профілактика нових випадків. Потрібна також освітня робота з суспільством."
+                            },
+                            {
+                                title: "Посилення відповідальності",
+                                description: "Жорсткіші покарання для кривдників, публічні судові процеси, реєстр агресорів",
+                                cost: 30, officers: 8, trust: -5, result: "bad",
+                                explanation: "⚠️ Репресивний підхід без освіти та соціальної роботи малоефективний. Потрібна превенція, а не тільки покарання. Змінювати треба культуру, а не тільки карати порушників."
+                            },
+                            {
+                                title: "Нічого не робити системно",
+                                description: "Реагувати тільки на конкретні випадки, системні програми не потрібні",
+                                cost: 10, officers: 2, trust: -25, result: "terrible",
+                                explanation: "❌ Катастрофічний провал! Домашнє насильство - системна проблема, яка потребує системних рішень. Без профілактики цикл насильства передається з покоління в покоління. Це відмова від захисту найвразливіших."
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // База випадкових подій для кожного сценарію
+        const randomEvents = {
+            theft: [
+                {
+                    title: "📰 Журналісти запитують про ситуацію",
+                    description: "Місцеві ЗМІ дізналися про хвилю крадіжок і хочуть коментар. Як відреагуєте?",
+                    options: [
+                        {
+                            title: "Відкритий коментар",
+                            description: "Розповісти про вжиті заходи, заспокоїти громаду, показати прозорість",
+                            trust: 10, budget: 0, officers: 0, result: "good"
+                        },
+                        {
+                            title: "Відмовитись коментувати",
+                            description: "Сказати що розслідування триває, деталі не розголошуються",
+                            trust: -5, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "👴 Скарга від мешканця",
+                    description: "Літня людина скаржиться що поліція нічого не робить. Сусіди підтримують скаргу.",
+                    options: [
+                        {
+                            title: "Особиста зустріч",
+                            description: "Зустрітися, вислухати, пояснити дії, налагодити комунікацію",
+                            trust: 15, budget: 5, officers: 1, result: "excellent"
+                        },
+                        {
+                            title: "Формальна відповідь",
+                            description: "Надіслати офіційну відповідь про вжиті заходи",
+                            trust: 0, budget: 0, officers: 0, result: "good"
+                        }
+                    ]
+                },
+                {
+                    title: "🚨 Нова крадіжка поруч",
+                    description: "Повідомлення про свіжу крадіжку у сусідньому під'їзді. Реагувати зараз?",
+                    options: [
+                        {
+                            title: "Негайний виїзд",
+                            description: "Відправити наряд, зафіксувати сліди, опитати свідків",
+                            trust: 10, budget: 10, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Після завершення поточної роботи",
+                            description: "Зареєструвати, виїхати після завершення іншої роботи",
+                            trust: -10, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                }
+            ],
+            drugs: [
+                {
+                    title: "📞 Дзвінок від батьків",
+                    description: "Група батьків вимагає термінової зустрічі. Вони налаштовані агресивно.",
+                    options: [
+                        {
+                            title: "Термінова зустріч сьогодні",
+                            description: "Організувати зустріч, заспокоїти, пояснити план дій",
+                            trust: 15, budget: 5, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Запланувати на наступний тиждень",
+                            description: "Пообіцяти зустріч, але перенести через завантаженість",
+                            trust: -10, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "⚖️ Прокуратура перевіряє",
+                    description: "Прокуратура запитує про хід розслідування. Потрібен звіт.",
+                    options: [
+                        {
+                            title: "Детальний звіт",
+                            description: "Підготувати повний звіт з доказами та планами",
+                            trust: 5, budget: 10, officers: 3, result: "good"
+                        },
+                        {
+                            title: "Короткий звіт",
+                            description: "Надати мінімальну інформацію, заощадити час",
+                            trust: 0, budget: 5, officers: 1, result: "good"
+                        }
+                    ]
+                },
+                {
+                    title: "💡 Нова інформація",
+                    description: "Інформатор повідомляє про нову точку збуту. Діяти зараз?",
+                    options: [
+                        {
+                            title: "Негайна перевірка",
+                            description: "Організувати спостереження та документування",
+                            trust: 10, budget: 15, officers: 4, result: "excellent"
+                        },
+                        {
+                            title: "Включити у загальний план",
+                            description: "Додати до плану, перевірити пізніше",
+                            trust: 0, budget: 0, officers: 0, result: "good"
+                        }
+                    ]
+                }
+            ],
+            youth: [
+                {
+                    title: "🏫 Дзвінок зі школи",
+                    description: "Директор школи скаржиться що підлітки пропускають уроки після ваших бесід.",
+                    options: [
+                        {
+                            title: "Додаткова робота зі школою",
+                            description: "Організувати спільні заходи, підключити психолога",
+                            trust: 15, budget: 10, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Пояснити це тимчасово",
+                            description: "Заспокоїти директора, сказати що ситуація стабілізується",
+                            trust: 0, budget: 0, officers: 0, result: "good"
+                        }
+                    ]
+                },
+                {
+                    title: "👨‍👩‍👦 Скарга від батьків",
+                    description: "Батьки одного з підлітків вимагають припинити вашу програму.",
+                    options: [
+                        {
+                            title: "Діалог з батьками",
+                            description: "Зустрітися, пояснити користь, залучити до програми",
+                            trust: 20, budget: 5, officers: 1, result: "excellent"
+                        },
+                        {
+                            title: "Виключити підлітка з програми",
+                            description: "Поступитися вимогам батьків",
+                            trust: -5, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "📱 Конфлікт у соцмережах",
+                    description: "Групи підлітків влаштували конфлікт онлайн. Може перерости у реальне протистояння.",
+                    options: [
+                        {
+                            title: "Втрутитися зараз",
+                            description: "Зв'язатися з лідерами, організувати зустріч, розрядити ситуацію",
+                            trust: 15, budget: 5, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Спостерігати",
+                            description: "Моніторити ситуацію, втрутитися тільки якщо почнеться реальний конфлікт",
+                            trust: -10, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                }
+            ],
+            wartime: [
+                {
+                    title: "💥 Несподіваний обстріл",
+                    description: "Під час вашої роботи стався обстріл. Потрібно реагувати негайно.",
+                    options: [
+                        {
+                            title: "Організувати порятунок",
+                            description: "Координувати евакуацію, забезпечити безпеку, допомогти постраждалим",
+                            trust: 20, budget: 20, officers: 5, result: "excellent"
+                        },
+                        {
+                            title: "Викликати спецслужби",
+                            description: "Передати ситуацію екстреним службам, зосередитися на своїй роботі",
+                            trust: 5, budget: 5, officers: 0, result: "good"
+                        }
+                    ]
+                },
+                {
+                    title: "🤝 Громада пропонує допомогу",
+                    description: "Активісти хочуть створити громадський патруль. Підтримати?",
+                    options: [
+                        {
+                            title: "Навчити та підтримати",
+                            description: "Організувати навчання, координувати дії, забезпечити зв'язок",
+                            trust: 25, budget: 15, officers: 3, result: "excellent"
+                        },
+                        {
+                            title: "Відмовити через безпеку",
+                            description: "Пояснити ризики, попросити не втручатися",
+                            trust: -10, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "⚔️ Військові скаржаться",
+                    description: "Військові скаржаться що цивільні патрулі заважають їх роботі.",
+                    options: [
+                        {
+                            title: "Організувати координацію",
+                            description: "Зустріч військових та патрулів, розподілити зони відповідальності",
+                            trust: 15, budget: 10, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Припинити роботу патрулів",
+                            description: "Поступитися військовим, розпустити громадські патрулі",
+                            trust: -15, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                }
+            ],
+            cyber: [
+                {
+                    title: "🏦 Дзвінок з банку",
+                    description: "Банк повідомляє про нову хвилю шахрайства. Клієнти скаржаться.",
+                    options: [
+                        {
+                            title: "Термінове попередження",
+                            description: "Випустити попередження, організувати брифінг для ЗМІ",
+                            trust: 20, budget: 10, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Додати до матеріалів семінару",
+                            description: "Включити інформацію у наступні заходи",
+                            trust: 5, budget: 0, officers: 0, result: "good"
+                        }
+                    ]
+                },
+                {
+                    title: "📱 Нові жертви",
+                    description: "5 літніх людей стали жертвами нового виду шахрайства.",
+                    options: [
+                        {
+                            title: "Розслідувати та попереджати",
+                            description: "Документувати схему, розробити захист, провести кампанію",
+                            trust: 15, budget: 20, officers: 4, result: "excellent"
+                        },
+                        {
+                            title: "Зареєструвати заяви",
+                            description: "Прийняти заяви, додати до статистики",
+                            trust: 0, budget: 5, officers: 1, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "📺 ЗМІ просять інтерв'ю",
+                    description: "Телеканал хоче зробити сюжет про кібербезпеку.",
+                    options: [
+                        {
+                            title: "Дати інтерв'ю",
+                            description: "Використати можливість для масового попередження",
+                            trust: 20, budget: 0, officers: 1, result: "excellent"
+                        },
+                        {
+                            title: "Відмовити через завантаженість",
+                            description: "Сказати що немає часу зараз",
+                            trust: -5, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                }
+            ],
+            domestic: [
+                {
+                    title: "🏥 Дзвінок з лікарні",
+                    description: "Лікар повідомляє про жінку з підозрілими травмами. Вона все заперечує.",
+                    options: [
+                        {
+                            title: "Делікатна розмова",
+                            description: "Поговорити наодинці, запропонувати допомогу, надати контакти центрів",
+                            trust: 20, budget: 5, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Не наполягати",
+                            description: "Якщо заперечує - залишити контакти та піти",
+                            trust: 0, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "👥 Сусіди повідомляють",
+                    description: "Сусіди чують крики з квартири, але бояться втручатися офіційно.",
+                    options: [
+                        {
+                            title: "Перевірити анонімно",
+                            description: "Організувати перевірку під приводом, оцінити ситуацію",
+                            trust: 15, budget: 5, officers: 2, result: "excellent"
+                        },
+                        {
+                            title: "Чекати офіційної заяви",
+                            description: "Пояснити що потрібна заява для дій",
+                            trust: -10, budget: 0, officers: 0, result: "bad"
+                        }
+                    ]
+                },
+                {
+                    title: "📞 Дзвінок від соцслужби",
+                    description: "Соцпрацівник просить допомоги з евакуацією жертви насильства.",
+                    options: [
+                        {
+                            title: "Негайна допомога",
+                            description: "Виїхати разом, забезпечити безпеку, супроводити до притулку",
+                            trust: 25, budget: 10, officers: 3, result: "excellent"
+                        },
+                        {
+                            title: "Дати консультацію",
+                            description: "Порадити як діяти, надати контакти, але не виїжджати",
+                            trust: 5, budget: 0, officers: 0, result: "good"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        function startScenario(scenarioId) {
+            const studentName = document.getElementById('student-name').value.trim();
+            const studentGroup = document.getElementById('student-group').value.trim();
+            const timePressureMode = document.getElementById('time-pressure-mode').checked;
+            
+            if (!studentName) {
+                alert('Будь ласка, введіть ПІБ');
+                return;
+            }
+
+            gameState = {
+                studentName: studentName,
+                studentGroup: studentGroup,
+                currentScenario: scenarioId,
+                currentStage: 0,
+                selectedOption: null,
+                decisions: [],
+                startTime: new Date(),
+                resourcesHistory: [],
+                randomEventsShown: [],
+                randomEventsCount: 0,
+                timePressureMode: timePressureMode,
+                timerInterval: null,
+                timeLeft: 45,
+                decisionTimes: [],
+                stageStartTime: null,
+                ...scenarios[scenarioId].initialResources
+            };
+
+            // Зберігаємо початковий стан
+            gameState.resourcesHistory.push({
+                stage: 0,
+                budget: gameState.budget,
+                officers: gameState.officers,
+                trust: gameState.trust,
+                label: 'Початок'
+            });
+
+            document.getElementById('start-screen').style.display = 'none';
+            loadScenario(scenarioId);
+        }
+
+        function loadScenario(scenarioId) {
+            const scenario = scenarios[scenarioId];
+            const container = document.getElementById('scenarios-container');
+            container.innerHTML = '';
+
+            const scenarioDiv = document.createElement('div');
+            scenarioDiv.className = 'scenario active';
+            scenarioDiv.id = `scenario-${scenarioId}`;
+
+            scenarioDiv.innerHTML = `
+                <div class="resources-panel" id="resources-${scenarioId}">
+                    <div class="resource-item">
+                        <h3 id="budget-${scenarioId}">${gameState.budget}</h3>
+                        <p>Бюджет (тис. грн)</p>
+                    </div>
+                    <div class="resource-item">
+                        <h3 id="officers-${scenarioId}">${gameState.officers}</h3>
+                        <p>Офіцерів</p>
+                    </div>
+                    <div class="resource-item">
+                        <h3 id="trust-${scenarioId}">${gameState.trust}</h3>
+                        <p>Довіра (%)</p>
+                    </div>
+                </div>
+                <div id="stage-container-${scenarioId}"></div>
+            `;
+
+            container.appendChild(scenarioDiv);
+            loadStage(scenarioId, 0);
+        }
+
+        function loadStage(scenarioId, stageIndex) {
+            const scenario = scenarios[scenarioId];
+            const stage = scenario.stages[stageIndex];
+            const container = document.getElementById(`stage-container-${scenarioId}`);
+            
+            container.innerHTML = `
+                <div class="stage-indicator">
+                    <h2>${stage.title}</h2>
+                    <p>${stage.description}</p>
+                </div>
+                
+                <div class="problem-description">
+                    <p><strong>Контекст:</strong> ${stage.context}</p>
+                </div>
+
+                <div class="criminology-theory">
+                    <h4>📖 Кримінологічний підхід</h4>
+                    <p>${stage.theory}</p>
+                </div>
+
+                <h3>Оберіть стратегію:</h3>
+                <div class="options" id="options-${scenarioId}-${stageIndex}">
+                    ${stage.options.map((opt, i) => `
+                        <div class="option" onclick="selectOption('${scenarioId}', ${stageIndex}, ${i})"
+                             data-cost="${opt.cost}" data-officers="${opt.officers}">
+                            <div class="cost-badge ${opt.cost > 40 ? 'cost-high' : opt.cost > 25 ? 'cost-medium' : 'cost-low'}">
+                                ${opt.cost} тис. грн | ${opt.officers} оф.
+                            </div>
+                            <h3>${opt.title}</h3>
+                            <p>${opt.description}</p>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="buttons">
+                    <button class="btn" id="next-btn-${scenarioId}-${stageIndex}" 
+                            onclick="proceedStage('${scenarioId}', ${stageIndex})" disabled>
+                        ${stageIndex < scenario.stages.length - 1 ? 'Продовжити' : 'Завершити сценарій'}
+                    </button>
+                    <button class="btn" onclick="resetScenario()">Почати заново</button>
+                </div>
+
+                <div id="result-${scenarioId}-${stageIndex}" class="results"></div>
+            `;
+            
+            // Запускаємо таймер якщо режим часу увімкнений
+            startTimer(scenarioId, stageIndex);
+        }
+
+        function selectOption(scenarioId, stageIndex, optionIndex) {
+            const scenario = scenarios[scenarioId];
+            const option = scenario.stages[stageIndex].options[optionIndex];
+            
+            if (option.cost > gameState.budget || option.officers > gameState.officers) {
+                alert('❌ Недостатньо ресурсів для цього варіанту!');
+                return;
+            }
+
+            document.querySelectorAll(`#options-${scenarioId}-${stageIndex} .option`).forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            event.currentTarget.classList.add('selected');
+            gameState.selectedOption = { ...option, index: optionIndex };
+            
+            // Зупиняємо таймер коли обрано варіант
+            stopTimer();
+            
+            document.getElementById(`next-btn-${scenarioId}-${stageIndex}`).disabled = false;
+        }
+
+        function proceedStage(scenarioId, stageIndex) {
+            if (!gameState.selectedOption) return;
+
+            const scenario = scenarios[scenarioId];
+            const option = gameState.selectedOption;
+            
+            gameState.budget -= option.cost;
+            gameState.officers -= option.officers;
+            gameState.trust += option.trust;
+            
+            gameState.decisions.push({
+                stage: stageIndex,
+                option: option.title,
+                result: option.result,
+                timestamp: new Date()
+            });
+
+            // Зберігаємо стан ресурсів після рішення
+            gameState.resourcesHistory.push({
+                stage: stageIndex + 1,
+                budget: gameState.budget,
+                officers: gameState.officers,
+                trust: gameState.trust,
+                label: `Етап ${stageIndex + 1}`
+            });
+
+            updateResources(scenarioId);
+            showResult(scenarioId, stageIndex, option);
+            
+            // Ховаємо кнопку "Далі" після вибору
+            document.getElementById(`next-btn-${scenarioId}-${stageIndex}`).style.display = 'none';
+        }
+
+        function showResult(scenarioId, stageIndex, option) {
+            const resultDiv = document.getElementById(`result-${scenarioId}-${stageIndex}`);
+            
+            let className = 'success';
+            if (option.result === 'bad' || option.result === 'terrible') {
+                className = option.result === 'terrible' ? 'failure' : 'warning';
+            }
+
+            resultDiv.className = `results show ${className}`;
+            resultDiv.innerHTML = `
+                <div class="score ${className}">
+                    ${option.result === 'excellent' ? '🎯 Відмінне рішення!' : 
+                      option.result === 'good' ? '👍 Непогане рішення' :
+                      option.result === 'bad' ? '⚠️ Сумнівне рішення' :
+                      '❌ Погане рішення'}
+                </div>
+                <div class="explanation">
+                    <strong>Кримінологічний аналіз:</strong><br>
+                    ${option.explanation}
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="showContinueButton('${scenarioId}', ${stageIndex})">✅ Зрозуміло</button>
+                </div>
+            `;
+        }
+
+        function showContinueButton(scenarioId, stageIndex) {
+            const resultDiv = document.getElementById(`result-${scenarioId}-${stageIndex}`);
+            const scenario = scenarios[scenarioId];
+            
+            // Змінюємо кнопку "Зрозуміло" на кнопку "Далі"
+            resultDiv.querySelector('div[style*="text-align: center"]').innerHTML = `
+                <button class="btn" onclick="continueToNextStage('${scenarioId}', ${stageIndex})">
+                    ${stageIndex < scenario.stages.length - 1 ? '➡️ Далі до наступного етапу' : '🏁 Завершити операцію'}
+                </button>
+            `;
+        }
+
+        function continueToNextStage(scenarioId, stageIndex) {
+            const scenario = scenarios[scenarioId];
+            
+            // Спробувати показати випадкову подію (50% шанс, макс 3 події)
+            const eventShown = tryShowRandomEvent(scenarioId, stageIndex);
+            
+            if (stageIndex < scenario.stages.length - 1) {
+                // Якщо подія показана - наступний етап завантажиться після закриття події
+                // Якщо події немає - переходимо одразу
+                if (!eventShown) {
+                    gameState.currentStage = stageIndex + 1;
+                    gameState.selectedOption = null;
+                    loadStage(scenarioId, stageIndex + 1);
+                } else {
+                    // Зберігаємо що треба перейти до наступного етапу після події
+                    setTimeout(() => {
+                        gameState.currentStage = stageIndex + 1;
+                        gameState.selectedOption = null;
+                        loadStage(scenarioId, stageIndex + 1);
+                    }, 100);
+                }
+            } else {
+                // Останній етап - завершуємо після події (якщо вона є)
+                if (!eventShown) {
+                    finishScenario(scenarioId);
+                } else {
+                    setTimeout(() => {
+                        finishScenario(scenarioId);
+                    }, 100);
+                }
+            }
+        }
+
+        function updateResources(scenarioId) {
+            document.getElementById(`budget-${scenarioId}`).textContent = Math.max(0, gameState.budget);
+            document.getElementById(`officers-${scenarioId}`).textContent = Math.max(0, gameState.officers);
+            document.getElementById(`trust-${scenarioId}`).textContent = Math.max(0, gameState.trust);
+
+            const panel = document.getElementById(`resources-${scenarioId}`);
+            if (gameState.budget < 30 || gameState.officers < 5 || gameState.trust < 20) {
+                panel.classList.add('resources-low');
+            } else {
+                panel.classList.remove('resources-low');
+            }
+
+            if (gameState.budget < 0 || gameState.officers < 0 || gameState.trust <= 0) {
+                showGameOver('Ресурси вичерпані! У реальній роботі це означало б провал профілактичної програми.');
+            }
+        }
+
+        function finishScenario(scenarioId) {
+            console.log('finishScenario викликано для:', scenarioId);
+            console.log('gameState:', gameState);
+            console.log('resourcesHistory:', gameState.resourcesHistory);
+            
+            const excellentCount = gameState.decisions.filter(d => d.result === 'excellent').length;
+            const goodCount = gameState.decisions.filter(d => d.result === 'good').length;
+            const badCount = gameState.decisions.filter(d => d.result === 'bad').length;
+            const terribleCount = gameState.decisions.filter(d => d.result === 'terrible').length;
+
+            const score = excellentCount * 4 + goodCount * 2 - badCount * 1 - terribleCount * 3;
+            
+            console.log('Рахунок:', score, 'Довіра:', gameState.trust);
+            
+            gameState.endTime = new Date();
+            gameState.finalScore = score;
+
+            document.getElementById(`scenario-${scenarioId}`).style.display = 'none';
+
+            let message, analysis;
+            if (score >= 10 && gameState.trust >= 40) {
+                message = "🏆 Блискуча профілактична робота!";
+                analysis = `Ви продемонстрували глибоке розуміння кримінологічних принципів. Ваші рішення базувалися на:
+                <br>• Проактивному підході до запобігання
+                <br>• Роботі з причинами, а не наслідками
+                <br>• Залученні громади до профілактики
+                <br>• Комплексних довгострокових стратегіях
+                <br><br><strong>Оцінка: Відмінно (A)</strong>`;
+            } else if (score >= 6 && gameState.trust >= 25) {
+                message = "✅ Успішна профілактична програма";
+                analysis = `Ви показали хороше розуміння основ превентивної роботи. Були правильні рішення, але є простір для покращення:
+                <br>• Більше уваги довгостроковим наслідкам
+                <br>• Активніше залучення громадських ресурсів
+                <br>• Системніший підхід до профілактики
+                <br><br><strong>Оцінка: Добре (B)</strong>`;
+            } else if (score >= 3) {
+                message = "⚠️ Задовільний результат";
+                analysis = `Програма виконана, але з недоліками. Рекомендації:
+                <br>• Вивчіть кримінологічні теорії профілактики
+                <br>• Більше уваги превентивним заходам
+                <br>• Баланс між репресіями та соціальною роботою
+                <br><br><strong>Оцінка: Задовільно (C)</strong>`;
+            } else {
+                showGameOver('Профілактична програма провалена через системні помилки у підході!');
+                return;
+            }
+
+            document.getElementById('success-message').textContent = message;
+            
+            let timeStats = '';
+            if (gameState.timePressureMode && gameState.decisionTimes.length > 0) {
+                const avgTime = Math.round(gameState.decisionTimes.reduce((a, b) => a + b, 0) / gameState.decisionTimes.length);
+                timeStats = `<br><strong>⏱️ Режим часу:</strong> Середній час на рішення: ${avgTime} сек`;
+            }
+            
+            document.getElementById('final-stats').innerHTML = 
+                `<strong>Залишилося ресурсів:</strong><br>
+                Бюджет: ${gameState.budget} тис. грн | 
+                Офіцери: ${gameState.officers} | 
+                Довіра: ${gameState.trust}%<br>
+                <strong>Рішень:</strong> Відмінних: ${excellentCount}, Хороших: ${goodCount}, Поганих: ${badCount + terribleCount}${timeStats}`;
+            
+            document.getElementById('criminology-analysis').innerHTML = `
+                <h4>📊 Кримінологічний аналіз роботи</h4>
+                ${analysis}
+            `;
+
+            // Додаємо візуалізацію
+            const districtStatus = getDistrictStatus(score, gameState.trust);
+            try {
+                console.log('Створення візуалізації...');
+                document.getElementById('criminology-analysis').innerHTML += `
+                    <div class="visualization-container">
+                        <h3 style="text-align: center; color: #1e3c72; margin-bottom: 10px;">
+                            📊 Візуалізація результатів
+                        </h3>
+                        
+                        <div style="text-align: center; margin: 20px 0;">
+                            <span class="status-badge ${districtStatus.class}">
+                                ${districtStatus.emoji} ${districtStatus.label}
+                            </span>
+                        </div>
+
+                        ${getMoodIndicator(gameState.trust)}
+
+                        <div class="chart-grid">
+                            <div class="chart-box">
+                                <div class="chart-title">📈 Динаміка ресурсів по етапах</div>
+                                <div class="line-chart">
+                                    ${createResourcesChart(gameState.resourcesHistory)}
+                                </div>
+                            </div>
+                            
+                            <div class="chart-box">
+                                <div class="chart-title">🎯 Якість рішень</div>
+                                ${createDecisionsChart(gameState.decisions)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                console.log('Візуалізація створена успішно');
+            } catch (error) {
+                console.error('Помилка при створенні візуалізації:', error);
+                document.getElementById('criminology-analysis').innerHTML += `
+                    <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                        <p style="color: #856404;">⚠️ Помилка при відображенні графіків. Основні результати показані вище.</p>
+                    </div>
+                `;
+            }
+
+            // Додаємо позитивний епілог "Що було далі?"
+            const successEpilogue = getSuccessEpilogue(scenarioId, gameState.decisions);
+            if (successEpilogue) {
+                document.getElementById('criminology-analysis').innerHTML += `
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #4caf50; color: #1a1a1a;">
+                        <h4 style="color: #2e7d32; margin-bottom: 15px;">🎬 Що було далі? Майбутнє району</h4>
+                        <div style="color: #1a1a1a; line-height: 1.8;">
+                            ${successEpilogue}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('game-win').style.display = 'block';
+        }
+
+        function showGameOver(reason) {
+            document.querySelectorAll('.scenario').forEach(s => s.style.display = 'none');
+            document.getElementById('failure-reason').textContent = reason;
+            
+            // Додаємо епілог - що станеться в майбутньому
+            const epilogue = getFutureEpilogue(gameState.currentScenario, gameState.decisions);
+            
+            const gameOverDiv = document.getElementById('game-over');
+            gameOverDiv.innerHTML = `
+                <h1>💥 ОПЕРАЦІЯ ПРОВАЛЕНА</h1>
+                <h2>${reason}</h2>
+                <p style="margin: 20px 0;">Ваші ресурси вичерпані або довіра громади втрачена.</p>
+                
+                <div style="background: rgba(0,0,0,0.3); padding: 25px; border-radius: 10px; margin: 20px 0; text-align: left; line-height: 1.8;">
+                    <h3 style="text-align: center; margin-bottom: 20px; font-size: 1.4em;">📅 Епілог: Майбутнє району</h3>
+                    ${epilogue}
+                </div>
+                
+                <p style="font-style: italic; margin-top: 20px;">
+                    💡 У кримінології кожне рішення має довгострокові наслідки. 
+                    Неправильна стратегія може призвести до системних проблем.
+                </p>
+                
+                <div class="buttons">
+                    <button class="btn" onclick="resetScenario()">Спробувати знову</button>
+                </div>
+            `;
+            
+            gameOverDiv.style.display = 'block';
+        }
+
+        function getFutureEpilogue(scenarioId, decisions) {
+            const epilogues = {
+                theft: {
+                    bad: `
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Крадіжки у районі зросли на 40%. Злочинна група, яку ви не затримали, розширила свою діяльність. Вони тепер працюють у трьох сусідніх районах.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Мешканці втратили довіру до поліції. 15 родин виїхали з району. Ціни на житло впали на 25%. Місцеві активісти створили "групи самооборони", що призвело до кількох випадків самосуду.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Район отримав репутацію криміногенного. Бізнеси закриваються. Злочинна група розгалузилася на торгівлю наркотиками. Ви втратили посаду. Новий керівник витрачає вдвічі більше ресурсів, щоб виправити ситуацію.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Теорія "розбитих вікон" спрацювала. Без швидкої та ефективної реакції на майнові злочини, район перетворився на зону соціальної дезорганізації.
+                        </p>
+                    `,
+                    terrible: `
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Ваша пасивність стала відомою. Злочинці відчули безкарність і активізувалися. Крадіжки відбуваються щоденно, вже не тільки вдень, а й вночі.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>У районі з'явилися організовані групи з інших міст - почули, що тут "легка здобич". Мешканці самі встановлюють грати, сигналізації, наймають охорону. Довіра до поліції впала до 5%.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Район став "чорною діркою" на карті злочинності міста. ЗМІ пишуть про "поліцейський провал". Три великих підприємства вивели свої офіси. Безробіття зросло. Це призвело до ще більшого зростання злочинності.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Район офіційно визнаний найнебезпечнішим у місті. Мер оголосив про "спеціальну поліцейську операцію" з залученням спецпідрозділів. Ви звільнені з ганьбою. Район потребує 5 років для відновлення репутації.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Повна відсутність профілактики призвела до "ефекту доміно". Майнові злочини стали каталізатором для інших видів злочинності. Класичний приклад теорії соціальної дезорганізації.
+                        </p>
+                    `
+                },
+                drugs: {
+                    bad: `
+                        <p><strong>⏰ Через 2 місяці...</strong></p>
+                        <p>Торгівля наркотиками біля школи не припинилася. З'явилися нові дилери. Троє підлітків потрапили до лікарні з передозуванням. Батьки організували протест проти "безпорадної поліції".</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>12 учнів школи вже регулярно вживають наркотики. Четверо з них кинули навчання. Двоє почали дрібну торгівлю, щоб заробити на дозу. Школа втратила рейтинг, батьки масово переводять дітей до інших шкіл.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Район став відомим як "легке місце" для торгівлі наркотиками. Організована група встановила контроль над територією. П'ятеро підлітків мають кримінальні справи. Двоє загинули від передозування. Місцева громада зруйнована.</p>
+                        
+                        <p><strong>⏰ Через 2 роки...</strong></p>
+                        <p>Молоде покоління району має найвищий рівень наркозалежності в місті. Злочинність зросла в 3 рази - наркозалежні крадуть, щоб купити дозу. Соціальні служби перевантажені. Район потребує масштабної реабілітаційної програми.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Без системної профілактики наркозлочинність поширюється експоненціально. Теорія диференційованих асоціацій: вживання наркотиків стало нормою в підлітковій субкультурі.
+                        </p>
+                    `,
+                    terrible: `
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Ваше ігнорування проблеми призвело до трагедії - 15-річний підліток помер від передозування синтетичними наркотиками. ЗМІ називають це "вбивством через байдужість".</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Батьки загиблого підлітка подали на вас до суду. Справа набула резонансу. Наркоторгівля процвітає - тепер біля трьох шкіл району. Організована злочинна група встановила повний контроль.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>20 підлітків офіційно визнані наркозалежними. Більшість з них почали вчиняти злочини. У районі різко зросли крадіжки, грабежі, розбої. Місцеві мешканці бояться виходити ввечері.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Район став "наркозоною". Вже не тільки підлітки, а й дорослі масово вживають наркотики. Проституція, насильницькі злочини, тяжкі наркотики. Ви звільнені, відкрито кримінальне провадження за службову недбалість.</p>
+                        
+                        <p><strong>⏰ Через 2 роки...</strong></p>
+                        <p>Соціальна катастрофа. Половина молоді району має наркозалежність або кримінальне минуле. Держава витрачає мільйони на реабілітаційні програми. Район потребує десятиліття для відновлення.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Повне ігнорування ранніх ознак наркозлочинності призвело до соціальної деградації цілого району. Це класичний приклад провалу всіх рівнів профілактики.
+                        </p>
+                    `
+                },
+                youth: {
+                    bad: `
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Конфлікт між підлітковими групами загострився через ваші репресивні дії. Тепер це не просто бійки - підлітки озброїлися. Перша різанина, троє в лікарні.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Підліткові "банди" офіційно сформувалися. Є лідери, ієрархія, територіальний поділ. Дорослі злочинці почали вербувати їх для дрібних злочинів - підлітки не несуть повної відповідальності.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Вісім підлітків мають кримінальні справи. Двоє виключені зі школи. Троє втекли з дому, живуть на вулиці. Батьки одного з лідерів переїхали в інше місто, забравши сина - "тут його вб'ють".</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Підліткові угруповання стали частиною організованої злочинності. Займаються наркоторгівлею, крадіжками, вимаганням. П'ятеро вже у колонії для неповнолітніх. Район має найвищий показник ювенальної злочинності в області.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Репресивний підхід до підлітків без соціальної роботи призвів до закріплення девіантної ідентичності. Теорія стигматизації спрацювала повністю.
+                        </p>
+                    `,
+                    terrible: `
+                        <p><strong>⏰ Через 2 тижні...</strong></p>
+                        <p>Ваша байдужість призвела до трагедії - у черговій бійці один підліток загинув від ножового поранення. Йому було 16 років. Вся країна обговорює цю справу.</p>
+                        
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Обидві підліткові групи тепер озброєні. Батьки в паніці тримають дітей вдома. Школа працює під посиленою охороною. Ви під слідством за службову недбалість.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Підліткова війна переросла в серйозну кримінальну проблему. Організовані злочинні групи використовують підлітків. У районі атмосфера страху. Магазини закриваються раніше, вулиці порожні.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Більшість учасників обох груп мають кримінальні справи. Четверо у в'язниці, двоє у виховній колонії. Район став найнебезпечнішим для проживання з дітьми. Молоді сім'ї масово виїжджають.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Соціальна катастрофа. Ціле покоління підлітків району зруйновано. Хтось у в'язниці, хтось з психологічними травмами, хтось став жертвою насильства. Держава витрачає мільйони на соціальні програми відновлення.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Повне ігнорування ювенальних конфліктів призвело до формування стійких злочинних угруповань. Це втрачене покоління, якому потрібні роки реабілітації.
+                        </p>
+                    `
+                },
+                wartime: {
+                    bad: `
+                        <p><strong>⏰ Через тиждень...</strong></p>
+                        <p>Ваші жорсткі методи налаштували населення проти поліції. Під час наступного обстрілу мешканці не пускають патрулі до постраждалих будинків. Мародери діють безкарно.</p>
+                        
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Мародерство стало звичним явищем. Після кожного обстрілу пошкоджені будинки миттєво грабуються. Люди втратили відчуття безпеки навіть на власній території. Довіра до влади на нулі.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Громада розколота. Створилися "самооборонні загони", які інколи перетворюються на лінчувальників. Кілька випадків самосуду над підозрюваними. Ситуація виходить з-під контролю.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Район має репутацію "безвладдя". Організовані групи з інших міст приїжджають сюди для грабунків. Вже грабують не тільки пошкоджені будинки, а й діючі квартири. Населення масово евакуюється.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: У надзвичайних ситуаціях співпраця з громадою критична. Репресивний підхід зруйнував соціальні зв'язки, що призвело до повної дезорганізації.
+                        </p>
+                    `,
+                    terrible: `
+                        <p><strong>⏰ Через 3 дні...</strong></p>
+                        <p>Ваша пасивність призвела до масового мародерства. Пограбовано 15 квартир. Жертви звертаються до ЗМІ: "Поліція бездіє, нас грабують посеред дня".</p>
+                        
+                        <p><strong>⏰ Через тиждень...</strong></p>
+                        <p>Район став відомий як місце, де можна безкарно грабувати після обстрілів. Приїхали злочинці з інших міст. Мешканці створили власні озброєні патрулі - почалися сутички.</p>
+                        
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Анархія. Поліції не довіряють взагалі. Самосуд став звичним - спіймали мародера, побили. Є жертви. Ви відсторонені від посади. Військова прокуратура розслідує справу.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Більшість населення евакуювалася. Залишилися тільки ті, кому нікуди йти. Район фактично безвладний. Приходить спецназ для відновлення порядку. Це національний скандал.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Район включено до "зони особливого контролю". Військова адміністрація. На відновлення довіри піде багато років. Ви під судом за службову недбалість під час війни.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: У воєнний час відсутність правоохоронної системи призводить до швидкої соціальної деградації. Це приклад повного провалу ситуативної профілактики.
+                        </p>
+                    `
+                },
+                cyber: {
+                    bad: `
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Без належної профілактики кількість жертв кібершахрайства зросла втричі. Пенсіонери втратили загалом 2 мільйони гривень. Три випадки самогубств через фінансову катастрофу.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Місто стало відомим серед шахраїв як "легка ціль". З'явилися нові схеми. Тепер втрачають гроші не тільки пенсіонери, а й молодь, підприємці. Економічний збиток досягає десятків мільйонів.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Довіра до онлайн-платежів впала. Люди бояться користуватися банківськими картками. Це гальмує цифровізацію економіки. Бізнеси несуть збитки. Банки змушені збільшувати витрати на безпеку.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Регіон має найвищий рівень кіберзлочинності в країні. Створено спеціальний відділ для боротьби, але довіру відновити складно. Населення, особливо старше покоління, відмовляється від електронних послуг.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Без віктимологічної профілактики кіберзлочинність поширюється лавиноподібно. Відновлення довіри до цифрових технологій займе роки.
+                        </p>
+                    `,
+                    terrible: `
+                        <p><strong>⏰ Через 2 тижні...</strong></p>
+                        <p>78-річна пенсіонерка втратила всі заощадження - 300 тисяч гривень. Не витримавши, вона покінчила з життям. ЗМІ звинувачують поліцію: "Знали про проблему, нічого не робили".</p>
+                        
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Хвиля самогубств серед літніх людей, які втратили все. П'ять трагедій за місяць. Суспільний резонанс. Ви під слідством. Міністр внутрішніх справ публічно критикує вашу роботу.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Місто стало "Меккою" для кіберзлочинців. Щодня десятки людей втрачають гроші. Загальний збиток перевищив 50 мільйонів гривень. Економіка регіону постраждала - люди бояться витрачати.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Соціальна катастрофа. Сотні пенсіонерів опинилися за межею бідності. Благодійні організації перевантажені. Державі доводиться виділяти компенсації. Витрати в десятки разів більші, ніж потребувала б профілактика.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Ви звільнені та засуджені за службову недбалість. Місто отримало антирейтинг "найнебезпечніше для онлайн-операцій". Цифровізація регіону відкинута на роки назад. Довіра підірвана на покоління.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Повне ігнорування інформаційної профілактики в цифрову епоху призводить до масових жертв. Особливо вразливі групи населення потребують захисту.
+                        </p>
+                    `
+                },
+                domestic: {
+                    bad: `
+                        <p><strong>⏰ Через тиждень...</strong></p>
+                        <p>Жінку, якій ви не допомогли, знову побили. Цього разу важче. Вона у лікарні з переломами. Діти вилучені соціальними службами. Справа набула публічності.</p>
+                        
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>У районі виявлено ще 8 сімей з ознаками домашнього насильства. Без системи раннього виявлення більшість випадків залишаються латентними. Жертви не звертаються, бояться.</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Трагедія - одна з жінок вбита чоловіком. Діти стали свідками. Суспільний резонанс. З'ясувалося, що вона тричі зверталася до поліції, але їй не допомогли.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Район має найвищий рівень домашнього насильства. Жертви не довіряють поліції. Кризові центри перевантажені. Діти з сімей, де було насильство, мають психологічні травми, проблеми у школі.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Соціальні наслідки: покоління травмованих дітей, руйнування сімей, зростання підліткової агресії. Діти, які росли у насильстві, самі стають агресивними або жертвами. Цикл насильства продовжується.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Без ефективної віктимологічної профілактики домашнє насильство створює "міжпоколіннєвий цикл". Травмовані діти стають майбутніми агресорами або жертвами.
+                        </p>
+                    `,
+                    terrible: `
+                        <p><strong>⏰ Через 3 дні...</strong></p>
+                        <p>Жінка, якій ви не допомогли, мертва. Чоловік у стані алкогольного сп'яніння вбив її на очах у дітей. Діти у шоковому стані, їм 6 та 9 років. Вся країна обговорює цю справу.</p>
+                        
+                        <p><strong>⏰ Через тиждень...</strong></p>
+                        <p>З'ясувалося, що це була четверта заява від цієї сім'ї. Всі попередні ігнорувалися. Сусіди свідчать, що крики чули постійно. Ви відсторонені від посади, відкрито кримінальне провадження.</p>
+                        
+                        <p><strong>⏰ Через місяць...</strong></p>
+                        <p>Національний скандал. Парламент обговорює закон про посилення відповідальності поліції за ігнорування домашнього насильства. Ви - "обличчя провалу системи".</p>
+                        
+                        <p><strong>⏰ Через 3 місяці...</strong></p>
+                        <p>Виявлено десятки інших випадків, які ігнорувалися. Троє жінок госпіталізовані з важкими травмами. Одна втратила дитину через побиття. Система захисту від домашнього насильства в регіоні не працювала.</p>
+                        
+                        <p><strong>⏰ Через 6 місяців...</strong></p>
+                        <p>Діти загиблої жінки у психіатричній клініці. Вони стали свідками вбивства матері. Їм потрібні роки терапії. Старша дочка спробувала покінчити з життям.</p>
+                        
+                        <p><strong>⏰ Через рік...</strong></p>
+                        <p>Ви засуджені за службову недбалість, що призвела до загибелі людини. Діти загиблої виховуються у притулку, мають важкі психологічні травми. Це зруйновані життя, які вже не відновити.</p>
+                        
+                        <p style="color: #ffeb3b; font-weight: bold; margin-top: 15px;">
+                        🔍 Кримінологічний висновок: Ігнорування домашнього насильства - це не просто службова помилка, це дозвіл на вбивство. Кожна невтручання може коштувати життя. Це найтрагічніший провал профілактики.
+                        </p>
+                    `
+                }
+            };
+
+            // Визначаємо рівень провалу на основі рішень
+            const badDecisions = decisions.filter(d => d.result === 'bad' || d.result === 'terrible').length;
+            const terribleDecisions = decisions.filter(d => d.result === 'terrible').length;
+            
+            if (terribleDecisions >= 2 || badDecisions >= 3) {
+                return epilogues[scenarioId]?.terrible || epilogues[scenarioId]?.bad || '';
+            } else {
+                return epilogues[scenarioId]?.bad || '';
+            }
+        }
+
+        // ========== ФУНКЦІЇ ВІЗУАЛІЗАЦІЇ ==========
+        
+        function createResourcesChart(history) {
+            if (!history || history.length === 0) {
+                return '<p style="text-align: center; color: #666;">Немає даних для відображення</p>';
+            }
+            
+            if (history.length === 1) {
+                return '<p style="text-align: center; color: #666;">Недостатньо даних для графіка (потрібно мінімум 2 точки)</p>';
+            }
+            
+            try {
+                const maxBudget = Math.max(...history.map(h => h.budget), 1);
+                const maxOfficers = Math.max(...history.map(h => h.officers), 1);
+                const maxTrust = Math.max(...history.map(h => h.trust), 1);
+                
+                let points = history.map((h, i) => {
+                    const x = (i / (history.length - 1)) * 90 + 5;
+                    const yBudget = 95 - (h.budget / maxBudget) * 80;
+                    const yOfficers = 95 - (h.officers / maxOfficers) * 80;
+                    const yTrust = 95 - (h.trust / 100) * 80;
+                    return { x, yBudget, yOfficers, yTrust, label: h.label };
+                });
+                
+                const budgetPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.yBudget}`).join(' ');
+                const officersPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.yOfficers}`).join(' ');
+                const trustPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.yTrust}`).join(' ');
+                
+                return `
+                    <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+                        <path d="${budgetPath}" stroke="#ffc107" stroke-width="2" fill="none"/>
+                        <path d="${officersPath}" stroke="#2196F3" stroke-width="2" fill="none"/>
+                        <path d="${trustPath}" stroke="#4caf50" stroke-width="2" fill="none"/>
+                        ${points.map(p => `
+                            <circle cx="${p.x}" cy="${p.yBudget}" r="2" fill="#ffc107"/>
+                            <circle cx="${p.x}" cy="${p.yOfficers}" r="2" fill="#2196F3"/>
+                            <circle cx="${p.x}" cy="${p.yTrust}" r="2" fill="#4caf50"/>
+                        `).join('')}
+                    </svg>
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 0.85em;">
+                        <div><span style="color: #ffc107;">●</span> Бюджет</div>
+                        <div><span style="color: #2196F3;">●</span> Офіцери</div>
+                        <div><span style="color: #4caf50;">●</span> Довіра</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Помилка у createResourcesChart:', error);
+                return '<p style="text-align: center; color: #f44336;">Помилка відображення графіка</p>';
+            }
+        }
+
+        function createDecisionsChart(decisions) {
+            const excellent = decisions.filter(d => d.result === 'excellent').length;
+            const good = decisions.filter(d => d.result === 'good').length;
+            const bad = decisions.filter(d => d.result === 'bad').length;
+            const terrible = decisions.filter(d => d.result === 'terrible').length;
+            const total = decisions.length;
+            
+            const colors = {
+                excellent: '#4caf50',
+                good: '#2196F3',
+                bad: '#ff9800',
+                terrible: '#f44336'
+            };
+            
+            const data = [
+                { label: 'Відмінно', count: excellent, color: colors.excellent },
+                { label: 'Добре', count: good, color: colors.good },
+                { label: 'Погано', count: bad, color: colors.bad },
+                { label: 'Жахливо', count: terrible, color: colors.terrible }
+            ];
+            
+            const maxCount = Math.max(...data.map(d => d.count), 1);
+            
+            return `
+                <div class="bar-chart">
+                    ${data.map(d => {
+                        const height = (d.count / maxCount) * 100;
+                        return `
+                            <div class="bar" style="height: ${height}%; background: ${d.color};">
+                                ${d.count > 0 ? `<div class="bar-value">${d.count}</div>` : ''}
+                                <div class="bar-label">${d.label}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function getDistrictStatus(score, trust) {
+            if (score >= 10 && trust >= 60) {
+                return { label: 'ЗРАЗКОВИЙ РАЙОН', class: 'status-excellent', emoji: '🏆' };
+            } else if (score >= 6 && trust >= 40) {
+                return { label: 'БЕЗПЕЧНИЙ РАЙОН', class: 'status-good', emoji: '✅' };
+            } else if (score >= 3 && trust >= 25) {
+                return { label: 'СТАБІЛЬНИЙ РАЙОН', class: 'status-medium', emoji: '⚠️' };
+            } else {
+                return { label: 'ПРОБЛЕМНИЙ РАЙОН', class: 'status-bad', emoji: '❌' };
+            }
+        }
+
+        function getMoodIndicator(trust) {
+            let emoji, position;
+            if (trust >= 70) { emoji = '😊'; position = 90; }
+            else if (trust >= 50) { emoji = '🙂'; position = 70; }
+            else if (trust >= 30) { emoji = '😐'; position = 50; }
+            else if (trust >= 15) { emoji = '😟'; position = 30; }
+            else { emoji = '😢'; position = 10; }
+            
+            return `
+                <div style="position: relative; margin: 20px 0;">
+                    <div style="text-align: center; margin-bottom: 10px; font-weight: bold;">
+                        Настрій громади: ${trust}%
+                    </div>
+                    <div class="mood-scale">
+                        <div class="mood-indicator" style="left: ${position}%;">
+                            ${emoji}
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85em; color: #666;">
+                        <span>Критичний</span>
+                        <span>Нейтральний</span>
+                        <span>Відмінний</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========== ФУНКЦІЇ ТАЙМЕРА ==========
+        
+        function startTimer(scenarioId, stageIndex) {
+            if (!gameState.timePressureMode) return;
+            
+            gameState.timeLeft = 45;
+            gameState.stageStartTime = new Date();
+            
+            const timerContainer = document.getElementById('timer-container');
+            const timerDisplay = document.getElementById('timer-display');
+            const progressBar = document.getElementById('timer-progress-bar');
+            
+            timerContainer.classList.add('active');
+            timerContainer.classList.remove('warning');
+            progressBar.style.width = '100%';
+            
+            // Очищуємо попередній інтервал якщо є
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                timerDisplay.textContent = gameState.timeLeft;
+                
+                const progress = (gameState.timeLeft / 45) * 100;
+                progressBar.style.width = progress + '%';
+                
+                // Попередження коли залишилося 10 секунд
+                if (gameState.timeLeft <= 10) {
+                    timerContainer.classList.add('warning');
+                }
+                
+                // Час вийшов
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleTimeOut(scenarioId, stageIndex);
+                }
+            }, 1000);
+        }
+        
+        function stopTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            
+            // Зберігаємо час рішення
+            if (gameState.stageStartTime) {
+                const decisionTime = Math.floor((new Date() - gameState.stageStartTime) / 1000);
+                gameState.decisionTimes.push(decisionTime);
+            }
+            
+            const timerContainer = document.getElementById('timer-container');
+            timerContainer.classList.remove('active', 'warning');
+        }
+        
+        function handleTimeOut(scenarioId, stageIndex) {
+            const scenario = scenarios[scenarioId];
+            const stage = scenario.stages[stageIndex];
+            
+            // Знаходимо найгірший варіант
+            const worstOption = stage.options.reduce((worst, current) => {
+                const worstScore = (worst.result === 'terrible' ? 0 : worst.result === 'bad' ? 1 : worst.result === 'good' ? 2 : 3);
+                const currentScore = (current.result === 'terrible' ? 0 : current.result === 'bad' ? 1 : current.result === 'good' ? 2 : 3);
+                return currentScore < worstScore ? current : worst;
+            });
+            
+            // Автоматично вибираємо найгірший варіант
+            gameState.selectedOption = worstOption;
+            gameState.decisionTimes.push(45); // Максимальний час
+            
+            // Показуємо попередження
+            alert('⏰ Час вийшов! Автоматично обрано найгірший варіант через нерішучість.');
+            
+            // Виконуємо дію
+            proceedStage(scenarioId, stageIndex);
+        }
+
+        // ========== ФУНКЦІЇ ВИПАДКОВИХ ПОДІЙ ==========
+        
+        function tryShowRandomEvent(scenarioId, afterStage) {
+            // Перевіряємо чи показувати випадкову подію (25% шанс після кожного етапу, але не більше 3 подій)
+            if (gameState.randomEventsCount >= 3) return false;
+            if (Math.random() > 0.25) return false;
+            
+            // Отримуємо доступні події для сценарію
+            const events = randomEvents[scenarioId];
+            if (!events || events.length === 0) return false;
+            
+            // Знаходимо події які ще не показували
+            const availableEvents = events.filter((_, index) => !gameState.randomEventsShown.includes(index));
+            if (availableEvents.length === 0) return false;
+            
+            // Вибираємо випадкову подію
+            const randomIndex = Math.floor(Math.random() * availableEvents.length);
+            const eventIndex = events.indexOf(availableEvents[randomIndex]);
+            const event = events[eventIndex];
+            
+            // Зберігаємо що показали цю подію
+            gameState.randomEventsShown.push(eventIndex);
+            gameState.randomEventsCount++;
+            
+            // Показуємо подію
+            showRandomEvent(scenarioId, event, afterStage);
+            return true;
+        }
+        
+        function showRandomEvent(scenarioId, event, afterStage) {
+            // Заповнюємо модальне вікно
+            document.getElementById('random-event-title').textContent = event.title;
+            document.getElementById('random-event-description').textContent = event.description;
+            
+            const optionsContainer = document.getElementById('random-event-options');
+            optionsContainer.innerHTML = '';
+            
+            event.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'random-event-option';
+                optionDiv.onclick = () => handleRandomEventChoice(scenarioId, option, afterStage);
+                
+                optionDiv.innerHTML = `
+                    <div class="random-event-option-title">${option.title}</div>
+                    <div>${option.description}</div>
+                    <div class="random-event-impact">
+                        ${option.trust !== 0 ? `Довіра: ${option.trust > 0 ? '+' : ''}${option.trust}% ` : ''}
+                        ${option.budget !== 0 ? `Бюджет: ${option.budget > 0 ? '+' : ''}${option.budget} ` : ''}
+                        ${option.officers !== 0 ? `Офіцери: ${option.officers > 0 ? '+' : ''}${option.officers}` : ''}
+                    </div>
+                `;
+                
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Показуємо overlay
+            document.getElementById('random-event-overlay').style.display = 'flex';
+        }
+        
+        function handleRandomEventChoice(scenarioId, option, afterStage) {
+            // Застосовуємо вплив на ресурси
+            gameState.budget += option.budget;
+            gameState.officers += option.officers;
+            gameState.trust += option.trust;
+            
+            // Зберігаємо рішення
+            gameState.decisions.push({
+                stage: afterStage,
+                option: option.title,
+                result: option.result,
+                timestamp: new Date(),
+                isRandomEvent: true
+            });
+            
+            // Зберігаємо стан ресурсів
+            gameState.resourcesHistory.push({
+                stage: afterStage + 0.5, // Щоб показати що це між етапами
+                budget: gameState.budget,
+                officers: gameState.officers,
+                trust: gameState.trust,
+                label: `Подія після етапу ${afterStage + 1}`
+            });
+            
+            // Оновлюємо ресурси на екрані
+            updateResources(scenarioId);
+            
+            // Ховаємо модальне вікно
+            document.getElementById('random-event-overlay').style.display = 'none';
+            
+            // Перевіряємо чи не вичерпані ресурси
+            if (gameState.budget < 0 || gameState.officers < 0 || gameState.trust < 10) {
+                showGameOver('Ресурси вичерпані після несподіваної події!');
+            }
+        }
+
+        function getSuccessEpilogue(scenarioId, decisions) {
+            const epilogues = {
+                theft: `
+                    <p><strong>⏰ Через місяць...</strong></p>
+                    <p>Завдяки ефективній профілактичній роботі кількість квартирних крадіжок скоротилася на 60%. Затримана злочинна група постане перед судом. Мешканці району висловлюють подяку поліції за оперативні дії.</p>
+                    
+                    <p><strong>⏰ Через 6 місяців...</strong></p>
+                    <p>Створена програма захисту житла працює ефективно. 85% мешканців встановили якісні замки, 40 під'їздів обладнані системами відеоспостереження. Активно працюють громадські чати безпеки. Крадіжки скоротилися на 80%.</p>
+                    
+                    <p><strong>⏰ Через рік...</strong></p>
+                    <p>Район став зразковим у питаннях профілактики майнових злочинів. Ваш досвід переймають інші райони міста. Довіра до поліції зросла до 85%. Ціни на житло підвищилися на 15% - район став привабливим для молодих сімей.</p>
+                    
+                    <p><strong>⏰ Через 2 роки...</strong></p>
+                    <p>Модель "Безпечний район", яку ви створили, впроваджена у 10 районах міста. Ви отримали звання "Кращий керівник превентивної роботи року". Статистика злочинності стабільно низька. Громада активно співпрацює з поліцією.</p>
+                    
+                    <p style="color: #1b5e20; font-weight: bold; margin-top: 15px;">
+                    ✅ Кримінологічний висновок: Ефективна віктимологічна профілактика в поєднанні з залученням громади створила стійку систему захисту. Це приклад успішної реалізації теорії соціального контролю.
+                    </p>
+                `,
+                drugs: `
+                    <p><strong>⏰ Через місяць...</strong></p>
+                    <p>Завдяки швидким діям торгівля наркотиками біля школи припинена. Затримано 5 торговців та встановлено канал постачання. Всі 8 підлітків, які вживали наркотики, отримують професійну психологічну допомогу.</p>
+                    
+                    <p><strong>⏰ Через 6 місяців...</strong></p>
+                    <p>Освітня програма про небезпеку наркотиків охопила 5 шкіл району. Створено 3 молодіжних центри з безкоштовними секціями. 6 з 8 підлітків успішно пройшли реабілітацію та повернулися до навчання. Нових випадків наркоспоживання серед школярів не зафіксовано.</p>
+                    
+                    <p><strong>⏰ Через рік...</strong></p>
+                    <p>Район має найнижчий рівень підліткової наркозалежності в місті. Молодіжні центри відвідує 500+ підлітків. Батьки активно залучені до профілактичної роботи. Створено волонтерську групу з колишніх залежних, які діляться досвідом зі школярами.</p>
+                    
+                    <p><strong>⏰ Через 2 роки...</strong></p>
+                    <p>Ваша модель комплексної профілактики наркозлочинності визнана Міністерством внутрішніх справ найкращою практикою. Створено методичні рекомендації для інших регіонів. Жоден з підлітків, які пройшли вашу програму, не повернувся до вживання.</p>
+                    
+                    <p style="color: #1b5e20; font-weight: bold; margin-top: 15px;">
+                    ✅ Кримінологічний висновок: Поєднання спеціально-кримінологічної та загальносоціальної профілактики створило альтернативу наркотикам. Успішна реалізація теорії аномії - надання легітимних способів самореалізації.
+                    </p>
+                `,
+                youth: `
+                    <p><strong>⏰ Через місяць...</strong></p>
+                    <p>Конфлікт між підлітковими групами повністю вичерпано. Обидві групи беруть участь у спільному проєкті з благоустрою парку. Батьки та школа активно залучені. Нових бійок не зафіксовано.</p>
+                    
+                    <p><strong>⏰ Через 6 місяців...</strong></p>
+                    <p>Створена молодіжна рада при поліції працює ефективно. Колишні лідери "банд" тепер організовують спортивні змагання та волонтерські акції. 20 підлітків з груп ризику займаються у спортивних секціях. Підліткова злочинність у районі скоротилася на 70%.</p>
+                    
+                    <p><strong>⏰ Через рік...</strong></p>
+                    <p>Молодіжна рада стала прикладом для інших районів. Підлітки з вашої програми виступають в школах з лекціями про запобігання насильству. Троє вступили до коледжу поліції. Район має найнижчий рівень ювенальної злочинності в місті.</p>
+                    
+                    <p><strong>⏰ Через 2 роки...</strong></p>
+                    <p>Модель відновного правосуддя для неповнолітніх, яку ви впровадили, визнана найефективнішою в країні. Жоден з учасників вашої програми не скоїв повторного правопорушення. Створено документальний фільм про ваш досвід роботи з підлітками.</p>
+                    
+                    <p style="color: #1b5e20; font-weight: bold; margin-top: 15px;">
+                    ✅ Кримінологічний висновок: Індивідуальна профілактика з елементами відновного правосуддя змінила девіантну ідентичність на просоціальну. Успішне застосування теорії диференційованих асоціацій в позитивному контексті.
+                    </p>
+                `,
+                wartime: `
+                    <p><strong>⏰ Через місяць...</strong></p>
+                    <p>Система швидкого реагування на надзвичайні ситуації працює бездоганно. Після трьох обстрілів не зафіксовано жодного випадку мародерства. Громадські патрулі ефективно контролюють територію. Довіра населення до поліції зросла до 80%.</p>
+                    
+                    <p><strong>⏰ Через 6 місяців...</strong></p>
+                    <p>Модель співпраці поліції та громади стала зразковою. 15 активних громадських патрулів, навчено 200+ волонтерів. Створено систему взаємодопомоги - мешканці допомагають один одному після обстрілів. Злочинність у надзвичайних ситуаціях близька до нуля.</p>
+                    
+                    <p><strong>⏰ Через рік...</strong></p>
+                    <p>Ваш досвід презентовано на міжнародній конференції з правоохоронної діяльності в умовах воєнного стану. Район отримав статус "найстійкішої громади". Система профілактики, яку ви створили, впроваджена у 20 містах прифронтової зони.</p>
+                    
+                    <p><strong>⏰ Через 2 роки...</strong></p>
+                    <p>Створено навчальний центр на базі вашого району, де правоохоронці з усієї країни вивчають досвід роботи в надзвичайних умовах. Ви отримали державну нагороду за внесок у зміцнення правопорядку під час війни. Громада залишається згуртованою та безпечною.</p>
+                    
+                    <p style="color: #1b5e20; font-weight: bold; margin-top: 15px;">
+                    ✅ Кримінологічний висновок: Ситуативна профілактика в поєднанні з сильним соціальним контролем громади створила стійку систему безпеки навіть в екстремальних умовах. Приклад успішної реалізації теорії соціального контролю.
+                    </p>
+                `,
+                cyber: `
+                    <p><strong>⏰ Через місяць...</strong></p>
+                    <p>Освітня кампанія охопила 5000+ пенсіонерів. Семінари проведено в 15 поліклініках та 10 пенсійних фондах. Кількість жертв кібершахрайства серед літніх людей скоротилася на 65%. Створено гарячу лінію підтримки.</p>
+                    
+                    <p><strong>⏰ Через 6 місяців...</strong></p>
+                    <p>Програма цифрової грамотності стала постійною. Співпраця з блогерами дала результат - 2 мільйони переглядів профілактичного контенту. Кількість жертв серед молоді скоротилася на 70%. Банки запровадили додаткові системи захисту за вашою рекомендацією.</p>
+                    
+                    <p><strong>⏰ Через рік...</strong></p>
+                    <p>Місто має найнижчий рівень кіберзлочинності в регіоні. Створено мобільний додаток "Безпека онлайн" з 50000+ користувачами. Ваша освітня програма впроваджена у шкільну програму. Інші міста переймають ваш досвід.</p>
+                    
+                    <p><strong>⏰ Через 2 роки...</strong></p>
+                    <p>Національна поліція визнала вашу модель віктимологічної профілактики кіберзлочинності найефективнішою в країні. Створено навчальний курс для правоохоронців. Економічні втрати від онлайн-шахрайства скоротилися на 80%. Культура цифрової безпеки стала частиною життя громади.</p>
+                    
+                    <p style="color: #1b5e20; font-weight: bold; margin-top: 15px;">
+                    ✅ Кримінологічний висновок: Комплексна інформаційна профілактика через множинні канали створила культуру безпеки. Успішне застосування віктимологічної профілактики - зменшення вразливості потенційних жертв через освіту.
+                    </p>
+                `,
+                domestic: `
+                    <p><strong>⏰ Через місяць...</strong></p>
+                    <p>Жертва домашнього насильства отримує комплексну підтримку, агресор проходить обов'язкову програму корекції поведінки. Діти під спостереженням психолога. Система раннього виявлення виявила ще 5 латентних випадків - всі отримали допомогу.</p>
+                    
+                    <p><strong>⏰ Через 6 місяців...</strong></p>
+                    <p>Мережа раннього виявлення працює ефективно. Навчено 100+ лікарів, вчителів, соцпрацівників. Виявлено та надано допомогу 25 сім'ям. Жодного випадку ескалації насильства. Створено 2 кризових центри для жертв.</p>
+                    
+                    <p><strong>⏰ Через рік...</strong></p>
+                    <p>Район має найнижчий рівень домашнього насильства в місті. Програма "Здорові стосунки" охоплює всі школи. 80% виявлених випадків завершилися успішною реінтеграцією сім'ї без насильства. Створено групи підтримки для жертв та агресорів.</p>
+                    
+                    <p><strong>⏰ Через 2 роки...</strong></p>
+                    <p>Ваша модель комплексної профілактики домашнього насильства стала національним стандартом. Створено методичні рекомендації для всіх регіонів. Покоління підлітків, які пройшли програму про здорові стосунки, демонструє нульову толерантність до насильства. Цикл насильства розірвано.</p>
+                    
+                    <p style="color: #1b5e20; font-weight: bold; margin-top: 15px;">
+                    ✅ Кримінологічний висновок: Багаторівнева профілактика (індивідуальна + загальносоціальна + віктимологічна) в поєднанні з раннім виявленням розірвала міжпоколіннєвий цикл насильства. Це зразок ефективної превентивної роботи.
+                    </p>
+                `
+            };
+
+            return epilogues[scenarioId] || '';
+        }
+
+        function resetScenario() {
+            document.querySelectorAll('.scenario').forEach(s => s.style.display = 'none');
+            document.getElementById('game-over').style.display = 'none';
+            document.getElementById('game-win').style.display = 'none';
+            document.getElementById('scenarios-container').innerHTML = '';
+            document.getElementById('start-screen').style.display = 'block';
+            
+            gameState = {
+                studentName: document.getElementById('student-name').value,
+                studentGroup: document.getElementById('student-group').value,
+                currentScenario: '',
+                currentStage: 0,
+                budget: 0,
+                officers: 0,
+                trust: 0,
+                selectedOption: null,
+                decisions: [],
+                startTime: null
+            };
+        }
+
+        function saveResults() {
+            const results = {
+                student: gameState.studentName,
+                group: gameState.studentGroup,
+                scenario: scenarios[gameState.currentScenario].name,
+                score: gameState.finalScore,
+                decisions: gameState.decisions,
+                resources: {
+                    budget: gameState.budget,
+                    officers: gameState.officers,
+                    trust: gameState.trust
+                },
+                duration: Math.round((gameState.endTime - gameState.startTime) / 1000 / 60),
+                timestamp: new Date().toISOString()
+            };
+
+            let allResults = JSON.parse(localStorage.getItem('criminologyResults') || '[]');
+            allResults.push(results);
+            localStorage.setItem('criminologyResults', JSON.stringify(allResults));
+
+            alert('✅ Результати збережено!');
+        }
+
+        function viewProgress() {
+            const allResults = JSON.parse(localStorage.getItem('criminologyResults') || '[]');
+            const modal = document.getElementById('progress-modal');
+            const content = document.getElementById('progress-content');
+
+            if (allResults.length === 0) {
+                content.innerHTML = '<p>Поки немає збережених результатів</p>';
+            } else {
+                content.innerHTML = `
+                    <table style="width:100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding:10px; border:1px solid #dee2e6;">ПІБ</th>
+                                <th style="padding:10px; border:1px solid #dee2e6;">Група</th>
+                                <th style="padding:10px; border:1px solid #dee2e6;">Сценарій</th>
+                                <th style="padding:10px; border:1px solid #dee2e6;">Бали</th>
+                                <th style="padding:10px; border:1px solid #dee2e6;">Час (хв)</th>
+                                <th style="padding:10px; border:1px solid #dee2e6;">Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allResults.map(r => `
+                                <tr>
+                                    <td style="padding:10px; border:1px solid #dee2e6;">${r.student}</td>
+                                    <td style="padding:10px; border:1px solid #dee2e6;">${r.group}</td>
+                                    <td style="padding:10px; border:1px solid #dee2e6;">${r.scenario}</td>
+                                    <td style="padding:10px; border:1px solid #dee2e6;">${r.score}</td>
+                                    <td style="padding:10px; border:1px solid #dee2e6;">${r.duration}</td>
+                                    <td style="padding:10px; border:1px solid #dee2e6;">${new Date(r.timestamp).toLocaleDateString('uk-UA')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function exportResults() {
+            const allResults = JSON.parse(localStorage.getItem('criminologyResults') || '[]');
+            
+            if (allResults.length === 0) {
+                alert('Немає результатів для експорту');
+                return;
+            }
+
+            let csv = 'ПІБ,Група,Сценарій,Бали,Час (хв),Довіра,Бюджет,Офіцери,Дата\n';
+            allResults.forEach(r => {
+                csv += `"${r.student}","${r.group}","${r.scenario}",${r.score},${r.duration},${r.resources.trust},${r.resources.budget},${r.resources.officers},"${new Date(r.timestamp).toLocaleDateString('uk-UA')}"\n`;
+            });
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `criminology_results_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function showKnowledgeBase() {
+            document.getElementById('knowledge-modal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function toggleTheory(theoryId) {
+            const content = document.getElementById(`theory-${theoryId}`);
+            content.classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
